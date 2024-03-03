@@ -31,7 +31,7 @@ SX128XLT LT;                                                   //create a librar
 uint8_t TXPacketL;
 uint32_t TXPacketCount, startmS, endmS;
 
-uint8_t buff[] = "Hello World 1234567890";
+uint8_t buff[] = "Hello World";
 
 void loop()
 {
@@ -61,7 +61,7 @@ void loop()
     packet_is_Error();                                 //transmit packet returned 0, so there was an error
   }
 
-  digitalWrite(LED1, LOW);
+  //digitalWrite(LED1, LOW);
   Serial.println();
   delay(packet_delay);                                 //have a delay between packets
 }
@@ -114,8 +114,8 @@ void led_Flash(uint16_t flashes, uint16_t delaymS)
 
 void setup()
 {
-  pinMode(LED1, OUTPUT);                                   //setup pin as output for indicator LED
-  led_Flash(2, 125);                                       //two quick LED flashes to indicate program start
+  //pinMode(LED1, OUTPUT);                                   //setup pin as output for indicator LED
+  //led_Flash(2, 125);                                       //two quick LED flashes to indicate program start
 
   Serial.begin(9600);
   Serial.println();
@@ -143,21 +143,21 @@ void setup()
     }
   }
 
-  LT.setupFLRC(Frequency, Offset, BandwidthBitRate, CodingRate, BT, Syncword);
+  //LT.setupFLRC(Frequency, Offset, BandwidthBitRate, CodingRate, BT, Syncword);
 
   //The full details of the setupFLRC function call above are listed below
   //***************************************************************************************************
   //Setup FLRC
   //***************************************************************************************************
-  //LT.setMode(MODE_STDBY_RC);
-  //LT.setRegulatorMode(USE_LDO);
-  //LT.setPacketType(PACKET_TYPE_FLRC);
-  //LT.setRfFrequency(Frequency, Offset);
-  //LT.setBufferBaseAddress(0, 0);
-  //LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
-  //LT.setPacketParams(PREAMBLE_LENGTH_32_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_3_BYTES, RADIO_WHITENING_OFF);
-  //LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
-  //LT.setSyncWord1(Syncword);
+  LT.setMode(MODE_STDBY_RC);
+  LT.setRegulatorMode(USE_LDO);
+  LT.setPacketType(PACKET_TYPE_FLRC);
+  LT.setRfFrequency(Frequency, Offset);
+  LT.setBufferBaseAddress(0, 0);
+  LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
+  LT.setPacketParams(PREAMBLE_LENGTH_32_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_3_BYTES, RADIO_WHITENING_OFF);
+  LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
+  LT.setSyncWord1(Syncword);
   //***************************************************************************************************
 
   Serial.println();
