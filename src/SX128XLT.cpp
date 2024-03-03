@@ -1500,7 +1500,7 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
     return false;
   }
 
-  setMode(MODE_STDBY_RC);
+  setMode(MODE_STDBY_XOSC);
   checkBusy();
 
 #ifdef USE_SPI_TRANSACTION          //to use SPI_TRANSACTION enable define at beginning of CPP file 
