@@ -159,7 +159,7 @@ void setup()
   LT.setPacketParams(PREAMBLE_LENGTH_16_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_OFF, RADIO_WHITENING_OFF);
   //LT.setDioIrqParams(IRQ_RADIO_ALL, IRQ_TX_DONE, IRQ_TX_DONE, 0);              //set for IRQ on TX done and timeout on DIO1
   LT.setSyncWord1(Syncword);
-  LT.setSyncWordErrors(2);                               // same as setSyncWordTolerance()
+  LT.setSyncWordErrorTolerance(2);                               // same as setSyncWordTolerance()
   LT.disableHighSensitivity();
   LT.setAutoFS(0x01);
   LT.setTxParams(TXpower, RADIO_RAMP_04_US);

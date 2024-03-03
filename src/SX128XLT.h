@@ -44,6 +44,9 @@ class SX128XLT  {
     void setPacketParams(uint8_t packetParam1, uint8_t  packetParam2, uint8_t packetParam3, uint8_t packetParam4, uint8_t packetParam5);
     void setDioIrqParams(uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask );
     void setHighSensitivity();
+    void setAutoFS(uint8_t enable);
+    void setFS();
+    void disableHighSensitivity();
     void setLowPowerRX();
     void printModemSettings();
     void printDevice();
