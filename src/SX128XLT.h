@@ -75,7 +75,7 @@ class SX128XLT  {
     void setSyncWord1(uint32_t syncword);
     void setSyncWord2(uint32_t syncword);
     void setSyncWord3(uint32_t syncword);
-    void setSyncWordErrors(uint8_t errors);
+    void setSyncWordErrorTolerance(uint8_t errors);
     void setSleep(uint8_t sleepconfig);
     uint16_t CRCCCITTSX(uint8_t startadd, uint8_t endadd, uint16_t startvalue);
     uint8_t getByteSXBuffer(uint8_t addr);
