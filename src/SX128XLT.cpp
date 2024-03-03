@@ -934,6 +934,29 @@ void SX128XLT::setHighSensitivity()
   writeRegister(REG_LNA_REGIME, (readRegister(REG_LNA_REGIME) | 0xC0));
 }
 
+void SX128XLT::disableHighSensitivity()
+{
+  //clear bits 7,6 of REG_LNA_REGIME
+
+  writeRegister(REG_LNA_REGIME, (readRegister(REG_LNA_REGIME) & ~0xC0));
+}
+
+void SX128XLT::setAutoFS(uint8_t enable)
+{
+  //Enabling or disabling AutoFS
+  uint8_t buffer[1];
+  buffer[0] = (uint8_t) (0x01);
+
+  clearIrqStatus(IRQ_RADIO_ALL);
+  writeCommand(RADIO_SET_AUTOFS, buffer, 1);
+}
+
+void SX128XLT::setFS()
+{
+  //To set device in Frequency Synthesizer Mode
+  writeCommand(RADIO_SET_FS, 0x00, 0);
+}
+
 
 void SX128XLT::setLowPowerRX()
 {

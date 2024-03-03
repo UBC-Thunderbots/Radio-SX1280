@@ -149,15 +149,22 @@ void setup()
   //***************************************************************************************************
   //Setup FLRC
   //***************************************************************************************************
-  LT.setMode(MODE_STDBY_RC);
-  LT.setRegulatorMode(USE_LDO);
-  LT.setPacketType(PACKET_TYPE_FLRC);
+  //LT.setSleep(RETAIN_None);
+  LT.setMode(MODE_STDBY_XOSC); 
+  //LT.setRegulatorMode(USE_DCDC); 
+  LT.setPacketType(PACKET_TYPE_FLRC); 
   LT.setRfFrequency(Frequency, Offset);
-  LT.setBufferBaseAddress(0, 0);
+  LT.setBufferBaseAddress(128, 0);
   LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
-  LT.setPacketParams(PREAMBLE_LENGTH_32_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_3_BYTES, RADIO_WHITENING_OFF);
-  LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
+  LT.setPacketParams(PREAMBLE_LENGTH_16_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_OFF, RADIO_WHITENING_OFF);
+  //LT.setDioIrqParams(IRQ_RADIO_ALL, IRQ_TX_DONE, IRQ_TX_DONE, 0);              //set for IRQ on TX done and timeout on DIO1
   LT.setSyncWord1(Syncword);
+  LT.setSyncWordErrors(2);                               // same as setSyncWordTolerance()
+  LT.disableHighSensitivity();
+  LT.setAutoFS(0x01);
+  LT.setTxParams(TXpower, RADIO_RAMP_04_US);
+  LT.setFS();
+  LT.clearIrqStatus(IRQ_RADIO_ALL);  
   //***************************************************************************************************
 
   Serial.println();
