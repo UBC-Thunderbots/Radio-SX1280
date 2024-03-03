@@ -44,9 +44,9 @@ class SX128XLT  {
     void setPacketParams(uint8_t packetParam1, uint8_t  packetParam2, uint8_t packetParam3, uint8_t packetParam4, uint8_t packetParam5);
     void setDioIrqParams(uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask );
     void setHighSensitivity();
+    void disableHighSensitivity();
     void setAutoFS(uint8_t enable);
     void setFS();
-    void disableHighSensitivity();
     void setLowPowerRX();
     void printModemSettings();
     void printDevice();
@@ -62,6 +62,7 @@ class SX128XLT  {
     void printASCIIPacket(uint8_t *buff, uint8_t tsize);
     uint8_t transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, int8_t txpower, uint8_t wait);
     uint8_t transmitIRQ(uint8_t *txbuffer, uint8_t size, uint16_t timeout, int8_t txpower, uint8_t wait);
+    uint8_t transmitFast(uint8_t *txbuffer, uint8_t size, uint16_t timeout, int8_t txpower, uint8_t wait);
     void setTxParams(int8_t TXpower, uint8_t RampTime);
     void setTx(uint16_t timeout);
     void clearIrqStatus( uint16_t irq );
@@ -70,6 +71,7 @@ class SX128XLT  {
     uint16_t CRCCCITT(uint8_t *buffer, uint32_t size, uint16_t start);
     uint8_t receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uint8_t wait);
     uint8_t receiveIRQ(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uint8_t wait);
+    uint8_t receiveFast(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uint8_t wait);
     int16_t readPacketRSSI2();
     int16_t readPacketRSSI();
     int8_t readPacketSNR();
@@ -241,7 +243,7 @@ class SX128XLT  {
     uint8_t _Device;                //saved device type
     uint8_t _TXDonePin;             //the pin that will indicate TX done
     uint8_t _RXDonePin;             //the pin that will indicate RX done
-    uint8_t _PERIODBASE = PERIODBASE_01_MS;
+    uint8_t   _PERIODBASE = PERIODBASE_01_MS;
 
     uint8_t  savedRegulatorMode;
     uint8_t  savedPacketType;
