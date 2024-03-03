@@ -249,21 +249,21 @@ void setup()
   //Setup FLRC
   //***************************************************************************************************
   LT.setMode(MODE_STDBY_XOSC);
-  LT.setRegulatorMode(USE_DCDC);
+  // LT.setRegulatorMode(USE_DCDC);
   LT.setPacketType(PACKET_TYPE_FLRC);
   LT.setRfFrequency(Frequency, Offset);
   LT.setBufferBaseAddress(128, 0); // what does this actually do? Changed it bc Tiger does it
   LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
   LT.setPacketParams(PREAMBLE_LENGTH_16_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_OFF, RADIO_WHITENING_OFF);
-  LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
+  // LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
   LT.setSyncWord1(Syncword);
   LT.setSyncWordErrorTolerance(2);
   LT.disableHighSensitivity();
-  LT.setAutoFs(0x01);
-  LT.setTxParams(TXpower, RAMP_TIME);
-  LT.setFs();
+  LT.setAutoFS(0x01);
+  LT.setTxParams(TXpower, RADIO_RAMP_04_US);
+  LT.setFS();
   LT.clearIrqStatus(IRQ_RADIO_ALL);
-  
+
   //***************************************************************************************************
   LT.setFLRCPayloadLengthReg(127);                             //FLRC will filter packets on receive according to length, so set to longest packet
   Serial.println();
