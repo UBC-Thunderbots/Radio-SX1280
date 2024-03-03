@@ -29,6 +29,7 @@
 #include <SPI.h>                                 //the lora device is SPI based so load the SPI library
 #include <SX128XLT.h>                            //include the appropriate library   
 #include "Settings.h"                            //include the setiings file, frequencies, LoRa settings etc   
+#include <string>
 
 SX128XLT LT;                                     //create a library class instance called LT
 
@@ -36,35 +37,99 @@ uint32_t RXpacketCount;
 uint32_t errors;
 
 uint8_t RXBUFFER[RXBUFFER_SIZE];                 //create the buffer that received packets are copied into
+uint8_t TXBUFFER[RXBUFFER_SIZE];
 
 uint8_t RXPacketL;                               //stores length of packet received
 int16_t  PacketRSSI;                             //stores RSSI of received packet
 
+uint8_t TXPacketL;
+uint32_t TXPacketCount, startmS, endmS;
 
 void loop()
 {
-  RXPacketL = LT.receive(RXBUFFER, RXBUFFER_SIZE, 60000, WAIT_RX); //wait for a packet to arrive with 60seconds (60000mS) timeout
-
-  digitalWrite(LED1, HIGH);                      //something has happened
+  RXPacketL = LT.receive(RXBUFFER, RXBUFFER_SIZE, 10000, WAIT_RX); //wait for a packet to arrive with 10seconds (10000mS) timeout
 
   PacketRSSI = LT.readPacketRSSI();              //read the recived RSSI value
 
   if (RXPacketL == 0)                            //if the LT.receive() function detects an error, RXpacketL == 0
   {
-    packet_is_Error();
+    Serial.println("RXPacketL == 0");
+    rx_packet_is_Error();
   }
   else
   {
-    packet_is_OK();
+    // transmit_back();
+    rx_packet_is_OK();
   }
 
-  digitalWrite(LED1, LOW);                        //LED off
+  // digitalWrite(LED1, LOW);                        //LED off
 
   Serial.println();
 }
 
+void transmit_back()
+{
+  Serial.print(TXpower);                                       //print the transmit power defined
+  Serial.print(F("dBm "));
+  Serial.print(F("Packet> "));
+  Serial.flush();
 
-void packet_is_OK()
+  memcpy(TXBUFFER, RXBUFFER, RXBUFFER_SIZE);
+
+  TXPacketL = sizeof(TXBUFFER);                                    //set TXPacketL to length of array
+  TXBUFFER[0] = '!';
+  TXBUFFER[TXPacketL - 1] = '*';                                   //replace null character at buffer end so its visible on reciver
+
+  LT.printASCIIPacket(TXBUFFER, TXPacketL);                        //print the buffer (the sent packet) as ASCII
+
+  startmS =  millis();                                         //start transmit timer
+  TXPacketL = LT.transmit(TXBUFFER, TXPacketL, Timeout, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
+
+  if (TXPacketL > 0)
+  {
+    endmS = millis();                                          //packet sent, note end time
+    TXPacketCount++;
+    tx_packet_is_OK();
+  }
+  else
+  {
+    tx_packet_is_Error();                                 //transmit packet returned 0, so there was an error
+  }
+
+  Serial.println();
+}
+
+void tx_packet_is_OK()
+{
+  //if here packet has been sent OK
+  uint16_t localCRC;
+
+  Serial.print(F("  BytesSent,"));
+  Serial.print(TXPacketL);                             //print transmitted packet length
+  localCRC = LT.CRCCCITT(TXBUFFER, TXPacketL, 0xFFFF);
+  Serial.print(F("  CRC,"));
+  Serial.print(localCRC, HEX);                              //print CRC of sent packet
+  Serial.print(F("  TransmitTime,"));
+  Serial.print(endmS - startmS);                       //print transmit time of packet
+  Serial.print(F("mS"));
+  Serial.print(F("  PacketsSent,"));
+  Serial.print(TXPacketCount);                         //print total of packets sent OK
+}
+
+void tx_packet_is_Error()
+{
+  //if here there was an error transmitting packet
+  uint16_t IRQStatus;
+  IRQStatus = LT.readIrqStatus();                  //read the the interrupt register
+  Serial.print(F(" SendError,"));
+  Serial.print(F("Length,"));
+  Serial.print(TXPacketL);                         //print transmitted packet length
+  Serial.print(F(",IRQreg,"));
+  Serial.print(IRQStatus, HEX);                    //print IRQ status
+  LT.printIrqStatus();                             //prints the text of which IRQs set
+}
+
+void rx_packet_is_OK()
 {
   uint16_t IRQStatus, localCRC;
 
@@ -92,7 +157,7 @@ void packet_is_OK()
 }
 
 
-void packet_is_Error()
+void rx_packet_is_Error()
 {
   uint16_t IRQStatus;
   IRQStatus = LT.readIrqStatus();                   //read the LoRa device IRQ status register
@@ -149,9 +214,6 @@ void led_Flash(uint16_t flashes, uint16_t delaymS)
 
 void setup()
 {
-  pinMode(LED1, OUTPUT);                        //setup pin as output for indicator LED
-  led_Flash(2, 125);                            //two quick LED flashes to indicate program start
-
   Serial.begin(9600);
   Serial.println();
   Serial.println(F("53_FLRC_Receiver Starting"));
@@ -164,7 +226,7 @@ void setup()
   //SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
 
   //setup hardware pins used by device, then check if device is found
-  if (LT.begin(NSS, NRESET, RFBUSY, DIO1, RX_EN, TX_EN, LORA_DEVICE))
+  if (LT.begin(NSS, NRESET, RFBUSY, DIO1, DIO2, DIO3, RX_EN, TX_EN, LORA_DEVICE))
   {
     Serial.println(F("FLRC Device found"));
     led_Flash(2, 125);
@@ -175,26 +237,26 @@ void setup()
     Serial.println(F("No FLRC device responding"));
     while (1)
     {
-      led_Flash(50, 50);                                       //long fast speed LED flash indicates device error
+      // led_Flash(50, 50);                                       //long fast speed LED flash indicates device error
     }
   }
 
 
-  LT.setupFLRC(Frequency, Offset, BandwidthBitRate, CodingRate, BT, Syncword);
+  // LT.setupFLRC(Frequency, Offset, BandwidthBitRate, CodingRate, BT, Syncword);
 
   //The full details of the setupFLRC function call above are listed below
   //***************************************************************************************************
   //Setup FLRC
   //***************************************************************************************************
-  //LT.setMode(MODE_STDBY_RC);
-  //LT.setRegulatorMode(USE_LDO);
-  //LT.setPacketType(PACKET_TYPE_FLRC);
-  //LT.setRfFrequency(Frequency, Offset);
-  //LT.setBufferBaseAddress(0, 0);
-  //LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
-  //LT.setPacketParams(PREAMBLE_LENGTH_32_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_3_BYTES, RADIO_WHITENING_OFF);
-  //LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
-  //LT.setSyncWord1(Syncword);
+  LT.setMode(MODE_STDBY_RC);
+  LT.setRegulatorMode(USE_LDO);
+  LT.setPacketType(PACKET_TYPE_FLRC);
+  LT.setRfFrequency(Frequency, Offset);
+  LT.setBufferBaseAddress(0, 0);
+  LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
+  LT.setPacketParams(PREAMBLE_LENGTH_32_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_3_BYTES, RADIO_WHITENING_OFF);
+  LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
+  LT.setSyncWord1(Syncword);
   //***************************************************************************************************
   LT.setFLRCPayloadLengthReg(127);                             //FLRC will filter packets on receive according to length, so set to longest packet
   Serial.println();
