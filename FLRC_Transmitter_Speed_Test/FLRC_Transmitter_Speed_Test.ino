@@ -107,7 +107,7 @@ void loop() {
   else{
 
     Serial.println();
-    Serial.print("Exiting, failed to press Y");
+    Serial.print("Exiting, failed to press 1");
     Serial.println();
     return;
 

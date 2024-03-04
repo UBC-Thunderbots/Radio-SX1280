@@ -37,4 +37,4 @@ const uint8_t Timeout = 1000;
 
 const uint16_t packet_delay = 100;                       //mS delay between packets
 
-#define RXBUFFER_SIZE 32                                 //Max RX buffer size  
+#define RXBUFFER_SIZE 127                                 //Max RX buffer size  

@@ -36,7 +36,9 @@
 //Added reliable packet functions
 //Added data transfer functions
 
-
+//Global Time Variables
+uint32_t startMs_g;
+uint32_t stopMs_g;
 
 SX128XLT::SX128XLT()
 {
@@ -1526,6 +1528,11 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
   setPayloadLength(_TXPacketL);
   setTxParams(txpower, RAMP_TIME);
   setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);   //set for IRQ on TX done and timeout on DIO1
+  
+  //Put into transmit mode
+  startMs_g = millis();
+  //Serial.println("Start time: ");
+  Serial.print(static_cast<float>(startMs_g));
   setTx(timeout);                                                            //this starts the TX
 
   if (!wait)
@@ -1832,6 +1839,10 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
   }
 
   while (!digitalRead(_RXDonePin));    //Wait for DIO1 to go high
+  stopMs_g = millis();
+  //Serial.println("Stop Time: ");
+  Serial.print(static_cast<float>(stopMs_g));
+
 
   setMode(MODE_STDBY_RC);              //ensure to stop further packet reception
   regdata = readIrqStatus();
@@ -1873,6 +1884,12 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
 #ifdef USE_SPI_TRANSACTION
   SPI.endTransaction();
 #endif
+
+  //Printing round trip time
+  // Serial.println();
+  // Serial.print("Round trip time: ");
+  // Serial.print(static_cast<float>(stopMs_g - startMs_g));
+  // Serial.println();
 
   return _RXPacketL;
 }
