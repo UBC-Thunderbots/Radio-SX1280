@@ -214,7 +214,7 @@ void led_Flash(uint16_t flashes, uint16_t delaymS)
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println();
   Serial.println(F("53_FLRC_Receiver Starting"));
   Serial.println();
@@ -248,11 +248,12 @@ void setup()
   //***************************************************************************************************
   //Setup FLRC
   //***************************************************************************************************
-  LT.setMode(MODE_STDBY_RC);
-  LT.setRegulatorMode(USE_LDO);
+  LT.setSleep(RETAIN_None);
+  LT.setMode(MODE_STDBY_XOSC);
+  LT.setRegulatorMode(USE_DCDC);
   LT.setPacketType(PACKET_TYPE_FLRC);
   LT.setRfFrequency(Frequency, Offset);
-  LT.setBufferBaseAddress(0, 0);
+  LT.setBufferBaseAddress(128, 0);
   LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
   LT.setPacketParams(PREAMBLE_LENGTH_32_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_3_BYTES, RADIO_WHITENING_OFF);
   LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
