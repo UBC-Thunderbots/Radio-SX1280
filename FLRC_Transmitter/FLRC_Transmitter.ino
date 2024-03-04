@@ -22,88 +22,80 @@
   Serial monitor baud rate is set at 9600
 *******************************************************************************************************/
 
-#include <SPI.h>                                               //the SX128X device is SPI based so load the SPI library                                         
-#include <SX128XLT.h>                                          //include the appropriate library  
-#include "Settings.h"                                          //include the setiings file, frequencies, LoRa settings etc   
+#include <SPI.h>       //the SX128X device is SPI based so load the SPI library
+#include <SX128XLT.h>  //include the appropriate library
+#include "Settings.h"  //include the setiings file, frequencies, LoRa settings etc
 
-SX128XLT LT;                                                   //create a library class instance called LT
+SX128XLT LT;  //create a library class instance called LT
 
 uint8_t TXPacketL;
 uint32_t TXPacketCount, startmS, endmS;
 
-uint8_t buff[] = "Hello World";
+uint8_t buff[] = "I love Rosh";
 
-void loop()
-{
-  Serial.print(TXpower);                                       //print the transmit power defined
+void loop() {
+  Serial.print(TXpower);  //print the transmit power defined
   Serial.print(F("dBm "));
   Serial.print(F("Packet> "));
   Serial.flush();
 
-  TXPacketL = sizeof(buff);                                    //set TXPacketL to length of array
-  buff[TXPacketL - 1] = '*';                                   //replace null character at buffer end so its visible on reciver
+  TXPacketL = sizeof(buff);   //set TXPacketL to length of array
+  buff[TXPacketL - 1] = '*';  //replace null character at buffer end so its visible on reciver
 
-  LT.printASCIIPacket(buff, TXPacketL);                        //print the buffer (the sent packet) as ASCII
+  LT.printASCIIPacket(buff, TXPacketL);  //print the buffer (the sent packet) as ASCII
 
   digitalWrite(LED1, HIGH);
-  startmS =  millis();                                         //start transmit timer
+  startmS = millis();  //start transmit timer
 
   TXPacketL = LT.transmit(buff, TXPacketL, 10000, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
 
-  if (TXPacketL > 0)
-  {
-    endmS = millis();                                          //packet sent, note end time
+  if (TXPacketL > 0) {
+    endmS = millis();  //packet sent, note end time
     TXPacketCount++;
     packet_is_OK();
-  }
-  else
-  {
-    packet_is_Error();                                 //transmit packet returned 0, so there was an error
+  } else {
+    packet_is_Error();  //transmit packet returned 0, so there was an error
   }
 
   //digitalWrite(LED1, LOW);
   Serial.println();
-  delay(packet_delay);                                 //have a delay between packets
+  delay(packet_delay);  //have a delay between packets
 }
 
 
-void packet_is_OK()
-{
+void packet_is_OK() {
   //if here packet has been sent OK
   uint16_t localCRC;
 
   Serial.print(F("  BytesSent,"));
-  Serial.print(TXPacketL);                             //print transmitted packet length
+  Serial.print(TXPacketL);  //print transmitted packet length
   localCRC = LT.CRCCCITT(buff, TXPacketL, 0xFFFF);
   Serial.print(F("  CRC,"));
-  Serial.print(localCRC, HEX);                              //print CRC of sent packet
+  Serial.print(localCRC, HEX);  //print CRC of sent packet
   Serial.print(F("  TransmitTime,"));
-  Serial.print(endmS - startmS);                       //print transmit time of packet
+  Serial.print(endmS - startmS);  //print transmit time of packet
   Serial.print(F("mS"));
   Serial.print(F("  PacketsSent,"));
-  Serial.print(TXPacketCount);                         //print total of packets sent OK
+  Serial.print(TXPacketCount);  //print total of packets sent OK
 }
 
 
-void packet_is_Error()
-{
+void packet_is_Error() {
   //if here there was an error transmitting packet
   uint16_t IRQStatus;
-  IRQStatus = LT.readIrqStatus();                  //read the the interrupt register
+  IRQStatus = LT.readIrqStatus();  //read the the interrupt register
   Serial.print(F(" SendError,"));
   Serial.print(F("Length,"));
-  Serial.print(TXPacketL);                         //print transmitted packet length
+  Serial.print(TXPacketL);  //print transmitted packet length
   Serial.print(F(",IRQreg,"));
-  Serial.print(IRQStatus, HEX);                    //print IRQ status
-  LT.printIrqStatus();                             //prints the text of which IRQs set
+  Serial.print(IRQStatus, HEX);  //print IRQ status
+  LT.printIrqStatus();           //prints the text of which IRQs set
 }
 
 
-void led_Flash(uint16_t flashes, uint16_t delaymS)
-{
+void led_Flash(uint16_t flashes, uint16_t delaymS) {
   uint16_t index;
-  for (index = 1; index <= flashes; index++)
-  {
+  for (index = 1; index <= flashes; index++) {
     digitalWrite(LED1, HIGH);
     delay(delaymS);
     digitalWrite(LED1, LOW);
@@ -112,8 +104,7 @@ void led_Flash(uint16_t flashes, uint16_t delaymS)
 }
 
 
-void setup()
-{
+void setup() {
   //pinMode(LED1, OUTPUT);                                   //setup pin as output for indicator LED
   //led_Flash(2, 125);                                       //two quick LED flashes to indicate program start
 
@@ -128,18 +119,14 @@ void setup()
   //SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
 
   //setup hardware pins used by device, then check if device is found
-  if (LT.begin(NSS, NRESET, RFBUSY, DIO1, RX_EN, TX_EN, LORA_DEVICE))
-  {
+  if (LT.begin(NSS, NRESET, RFBUSY, DIO1, RX_EN, TX_EN, LORA_DEVICE)) {
     Serial.println(F("FLRC Device found"));
-    led_Flash(2, 125);                                   //two further quick LED flashes to indicate device found
+    led_Flash(2, 125);  //two further quick LED flashes to indicate device found
     delay(1000);
-  }
-  else
-  {
+  } else {
     Serial.println(F("No FLRC device responding"));
-    while (1)
-    {
-      led_Flash(50, 50);                                 //long fast speed LED flash indicates device error
+    while (1) {
+      led_Flash(50, 50);  //long fast speed LED flash indicates device error
     }
   }
 
@@ -156,18 +143,23 @@ void setup()
   LT.setRfFrequency(Frequency, Offset);
   LT.setBufferBaseAddress(0, 0);
   LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
-  LT.setPacketParams(PREAMBLE_LENGTH_16_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 127, RADIO_CRC_OFF, RADIO_WHITENING_OFF);
-  LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
+  LT.setPacketParams(PREAMBLE_LENGTH_16_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 32, RADIO_CRC_OFF, RADIO_WHITENING_OFF);
+  LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);  //set for IRQ on TX done and timeout on DIO1
   LT.setSyncWord1(Syncword);
+  LT.setSyncWordErrorTolarnce(2);
+  LT.setAutoFS(0x01);
+  LT.setTxParams(TXpower, RADIO_RAMP_04_US);
+  LT.setFS();
+  LT.clearIrqStatus(IRQ_RADIO_ALL);  
   //***************************************************************************************************
 
   Serial.println();
-  LT.printModemSettings();                               //reads and prints the configured modem settings, useful check
+  LT.printModemSettings();  //reads and prints the configured modem settings, useful check
   Serial.println();
-  LT.printOperatingSettings();                           //reads and prints the configured operating settings, useful check
+  LT.printOperatingSettings();  //reads and prints the configured operating settings, useful check
   Serial.println();
   Serial.println();
-  LT.printRegisters(0x900, 0x9FF);                       //print contents of device registers
+  LT.printRegisters(0x900, 0x9FF);  //print contents of device registers
   Serial.println();
   Serial.println();
 

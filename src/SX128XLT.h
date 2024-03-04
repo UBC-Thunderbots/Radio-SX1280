@@ -44,6 +44,9 @@ class SX128XLT  {
     void setPacketParams(uint8_t packetParam1, uint8_t  packetParam2, uint8_t packetParam3, uint8_t packetParam4, uint8_t packetParam5);
     void setDioIrqParams(uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask );
     void setHighSensitivity();
+    void disableHighSensitivity();
+    void setAutoFS(uint8_t enable);
+    void setFS();
     void setLowPowerRX();
     void printModemSettings();
     void printDevice();
@@ -75,7 +78,7 @@ class SX128XLT  {
     void setSyncWord1(uint32_t syncword);
     void setSyncWord2(uint32_t syncword);
     void setSyncWord3(uint32_t syncword);
-    void setSyncWordErrors(uint8_t errors);
+    void setSyncWordErrorTolarnce(uint8_t errors);
     void setSleep(uint8_t sleepconfig);
     uint16_t CRCCCITTSX(uint8_t startadd, uint8_t endadd, uint16_t startvalue);
     uint8_t getByteSXBuffer(uint8_t addr);
