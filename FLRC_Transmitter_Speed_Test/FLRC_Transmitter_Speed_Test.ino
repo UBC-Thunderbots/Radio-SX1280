@@ -28,10 +28,15 @@
 
 SX128XLT LT;  //create a library class instance called LT
 
+//TX
 uint8_t TXPacketL;
 uint32_t TXPacketCount, startmS, endmS;
 
-uint8_t buff[] = "I love Rosh";
+//RX
+uint8_t buff[RXBUFFER_SIZE];
+
+//User Input Variable
+char userInput;
 
 void loop() {
   Serial.print(TXpower);  //print the transmit power defined
@@ -39,23 +44,51 @@ void loop() {
   Serial.print(F("Packet> "));
   Serial.flush();
 
+  for (int i = 0; i < RXBUFFER_SIZE; ++i) {
+    buff[i] = 'A';
+  }
+
   TXPacketL = sizeof(buff);   //set TXPacketL to length of array
   buff[TXPacketL - 1] = '*';  //replace null character at buffer end so its visible on reciver
 
   LT.printASCIIPacket(buff, TXPacketL);  //print the buffer (the sent packet) as ASCII
 
-  digitalWrite(LED1, HIGH);
+  //digitalWrite(LED1, HIGH);
   startmS = millis();  //start transmit timer
 
-  TXPacketL = LT.transmit(buff, TXPacketL, 10000, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
+  //User Input Logic
+  Serial.println();
+  Serial.print("Enter any key if you want to send a packet: Enter 1");
+  userInput = 1;
+  while(Serial.available() == 0){};
+  userInput = Serial.parseInt();
 
-  if (TXPacketL > 0) {
-    endmS = millis();  //packet sent, note end time
-    TXPacketCount++;
-    packet_is_OK();
-  } else {
-    packet_is_Error();  //transmit packet returned 0, so there was an error
+  if(userInput == 1){
+    //User Input Code
+    Serial.println();
+    Serial.print("You entered '1'. Proceeding...\n");
+    Serial.println();
+
+    TXPacketL = LT.transmit(buff, TXPacketL, 10000, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
+  
+    if (TXPacketL > 0) {
+      endmS = millis();  //packet sent, note end time
+      TXPacketCount++;
+      packet_is_OK();
+    } else {
+      packet_is_Error();  //transmit packet returned 0, so there was an error
+    }
+
   }
+  else{
+
+    Serial.println();
+    Serial.print("Exiting, failed to press Y");
+    Serial.println();
+    return;
+
+  }
+  
 
   //digitalWrite(LED1, LOW);
   Serial.println();

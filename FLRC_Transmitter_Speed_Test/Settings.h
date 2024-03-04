@@ -38,4 +38,4 @@ const uint32_t Syncword = 0x54696761;                     //FLRC uses syncword
 const int8_t TXpower  = 30;                                //power for transmissions in dBm
 const uint16_t packet_delay = 100;                       //mS delay between packets
 
-#define RXBUFFER_SIZE 127                                 //Max RX buffer size  
+#define RXBUFFER_SIZE 32                                 //Max RX buffer size  

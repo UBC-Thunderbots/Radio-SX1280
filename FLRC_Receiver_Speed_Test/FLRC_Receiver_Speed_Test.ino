@@ -29,7 +29,7 @@
 #include <SPI.h>                                 //the lora device is SPI based so load the SPI library
 #include <SX128XLT.h>                            //include the appropriate library   
 #include "Settings.h"                            //include the setiings file, frequencies, LoRa settings etc   
-#include <string>
+
 
 SX128XLT LT;                                     //create a library class instance called LT
 
@@ -255,7 +255,7 @@ void setup()
   LT.setRfFrequency(Frequency, Offset);
   LT.setBufferBaseAddress(0, 0);
   LT.setModulationParams(BandwidthBitRate, CodingRate, BT);
-  LT.setPacketParams(PREAMBLE_LENGTH_16_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, 32, RADIO_CRC_OFF, RADIO_WHITENING_OFF);
+  LT.setPacketParams(PREAMBLE_LENGTH_16_BITS, FLRC_SYNC_WORD_LEN_P32S, RADIO_RX_MATCH_SYNCWORD_1, RADIO_PACKET_VARIABLE_LENGTH, RXBUFFER_SIZE, RADIO_CRC_OFF, RADIO_WHITENING_OFF);
   LT.setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);              //set for IRQ on TX done and timeout on DIO1
   LT.setSyncWord1(Syncword);
   LT.setSyncWordErrorTolarnce(2);
@@ -264,7 +264,7 @@ void setup()
   LT.setFS();
   LT.clearIrqStatus(IRQ_RADIO_ALL);  
   //***************************************************************************************************
-  LT.setFLRCPayloadLengthReg(32);                             //FLRC will filter packets on receive according to length, so set to longest packet
+  LT.setFLRCPayloadLengthReg(RXBUFFER_SIZE);                             //FLRC will filter packets on receive according to length, so set to longest packet
   Serial.println();
   LT.printModemSettings();                                     //reads and prints the configured modem settings, useful check
   Serial.println();
