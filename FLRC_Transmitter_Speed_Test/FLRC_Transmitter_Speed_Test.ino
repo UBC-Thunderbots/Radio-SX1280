@@ -33,10 +33,15 @@ uint8_t TXPacketL;
 uint32_t TXPacketCount, startmS, endmS;
 
 //RX
-uint8_t buff[RXBUFFER_SIZE];
+uint8_t RXBUFFER[RXBUFFER_SIZE];                 //create the buffer that received packets are copied into
+uint8_t RXPacketL;                               //stores length of packet received
+int16_t  PacketRSSI;                             //stores RSSI of received packet
+uint32_t RXpacketCount;
+uint32_t errors;
 
 //User Input Variable
 char userInput;
+uint8_t buff[RXBUFFER_SIZE];
 
 void loop() {
   Serial.print(TXpower);  //print the transmit power defined
@@ -64,6 +69,7 @@ void loop() {
   userInput = Serial.parseInt();
 
   if(userInput == 1){
+
     //User Input Code
     Serial.println();
     Serial.print("You entered '1'. Proceeding...\n");
@@ -74,10 +80,28 @@ void loop() {
     if (TXPacketL > 0) {
       endmS = millis();  //packet sent, note end time
       TXPacketCount++;
-      packet_is_OK();
+      packet_is_OK_transmit();
     } else {
-      packet_is_Error();  //transmit packet returned 0, so there was an error
+      packet_is_Error_transmit();  //transmit packet returned 0, so there was an error
     }
+
+    //Receiving Code
+    Serial.println();
+    Serial.print("Checking if received a return packet");
+    Serial.println();
+    
+    RXPacketL = LT.receive(RXBUFFER, RXBUFFER_SIZE, 10000, WAIT_RX); //wait for a packet to arrive with 1seconds (1s) timeout
+    PacketRSSI = LT.readPacketRSSI();              //read the recived RSSI value
+    if (RXPacketL == 0)                            //if the LT.receive() function detects an error, RXpacketL == 0
+    {
+      packet_is_Error_recieve();
+    }
+    else
+    {
+      packet_is_OK_recieve();
+    }
+
+    Serial.println();
 
   }
   else{
@@ -96,7 +120,7 @@ void loop() {
 }
 
 
-void packet_is_OK() {
+void packet_is_OK_transmit() {
   //if here packet has been sent OK
   uint16_t localCRC;
 
@@ -113,7 +137,7 @@ void packet_is_OK() {
 }
 
 
-void packet_is_Error() {
+void packet_is_Error_transmit() {
   //if here there was an error transmitting packet
   uint16_t IRQStatus;
   IRQStatus = LT.readIrqStatus();  //read the the interrupt register
@@ -125,6 +149,63 @@ void packet_is_Error() {
   LT.printIrqStatus();           //prints the text of which IRQs set
 }
 
+void packet_is_OK_recieve()
+{
+  uint16_t IRQStatus, localCRC;
+
+  IRQStatus = LT.readIrqStatus();                  //read the LoRa device IRQ status register
+
+  RXpacketCount++;
+
+  //printElapsedTime();                              //print elapsed time to Serial Monitor
+  Serial.print(F("  "));
+  LT.printASCIIPacket(RXBUFFER, RXPacketL);        //print the packet as ASCII characters
+
+  localCRC = LT.CRCCCITT(RXBUFFER, RXPacketL, 0xFFFF);  //calculate the CRC, this is the external CRC calculation of the RXBUFFER
+  Serial.print(F(",CRC,"));                        //contents, not the LoRa device internal CRC
+  Serial.print(localCRC, HEX);
+  Serial.print(F(",RSSI,"));
+  Serial.print(PacketRSSI);
+  Serial.print(F("dB,Length,"));
+  Serial.print(RXPacketL);
+  Serial.print(F(",Packets,"));
+  Serial.print(RXpacketCount);
+  Serial.print(F(",Errors,"));
+  Serial.print(errors);
+  Serial.print(F(",IRQreg,"));
+  Serial.print(IRQStatus, HEX);
+}
+
+void packet_is_Error_recieve()
+{
+  uint16_t IRQStatus;
+  IRQStatus = LT.readIrqStatus();                   //read the LoRa device IRQ status register
+
+  //printElapsedTime();                               //print elapsed time to Serial Monitor
+
+  if (IRQStatus & IRQ_RX_TIMEOUT)                   //check for an RX timeout
+  {
+    Serial.print(F(" RXTimeout"));
+  }
+  else
+  {
+    errors++;
+    Serial.print(F(" PacketError"));
+    Serial.print(F(",RSSI,"));
+    Serial.print(PacketRSSI);
+    Serial.print(F("dB,Length,"));
+    Serial.print(LT.readRXPacketL());               //get the real packet length
+    Serial.print(F(",Packets,"));
+    Serial.print(RXpacketCount);
+    Serial.print(F(",Errors,"));
+    Serial.print(errors);
+    Serial.print(F(",IRQreg,"));
+    Serial.print(IRQStatus, HEX);
+    LT.printIrqStatus();                            //print the names of the IRQ registers set
+  }
+
+
+}
 
 void led_Flash(uint16_t flashes, uint16_t delaymS) {
   uint16_t index;
