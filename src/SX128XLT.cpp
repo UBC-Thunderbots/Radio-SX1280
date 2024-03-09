@@ -2131,7 +2131,7 @@ void SX128XLT::setSyncWord3(uint32_t syncword)
 }
 
 
-void SX128XLT::setSyncWordErrorTolarnce(uint8_t errors)
+void SX128XLT::setSyncWordErrorTolerance(uint8_t errors)
 {
 #ifdef SX128XDEBUG1
   Serial.println(F("setSyncWordErrors()"));
