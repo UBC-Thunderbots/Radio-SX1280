@@ -1530,7 +1530,7 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
   setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);   //set for IRQ on TX done and timeout on DIO1
   
   //Put into transmit mode
-  startMs_g = millis();
+  startMs_g = micros();
   //Serial.println("Start time: ");
   Serial.print(static_cast<float>(startMs_g));
   setTx(timeout);                                                            //this starts the TX
@@ -1839,9 +1839,10 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
   }
 
   while (!digitalRead(_RXDonePin));    //Wait for DIO1 to go high
-  stopMs_g = millis();
+  stopMs_g = micros();
   //Serial.println("Stop Time: ");
-  Serial.print(static_cast<float>(stopMs_g));
+  Serial.println(static_cast<float>(stopMs_g));
+  Serial.println(stopMs_g - startMs_g);
 
 
   setMode(MODE_STDBY_RC);              //ensure to stop further packet reception
