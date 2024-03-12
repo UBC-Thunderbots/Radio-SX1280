@@ -76,6 +76,8 @@ void loop() {
     Serial.println();
 
     for (int i = 0; i < 6; i++){
+      buff[i] = 'B';
+
       TXPacketL = LT.transmit(buff, TXPacketL, 10000, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
   
       if (TXPacketL > 0) {
@@ -83,6 +85,7 @@ void loop() {
       } else {
         packet_is_Error_transmit();  //transmit packet returned 0, so there was an error
       }
+
     }
 
 
