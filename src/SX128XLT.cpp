@@ -37,8 +37,8 @@
 //Added data transfer functions
 
 //Global Time Variables
-uint32_t startMs_g;
-uint32_t stopMs_g;
+uint32_t start_us;
+uint32_t stop_us;
 
 SX128XLT::SX128XLT()
 {
@@ -1530,9 +1530,6 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
   setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);   //set for IRQ on TX done and timeout on DIO1
   
   //Put into transmit mode
-  startMs_g = micros();
-  Serial.println("Start time: ");
-  Serial.print(static_cast<float>(startMs_g));
   setTx(timeout);                                                            //this starts the TX
 
   if (!wait)
@@ -1541,6 +1538,11 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
   }
 
   while (!digitalRead(_TXDonePin));                    //Wait for DIO1 to go high
+  
+  stop_us = micros();
+  Serial.println("Transmit done time: ");
+  // Serial.println(static_cast<float>(stop_us));
+  Serial.println(stop_us-start_us);
 
   setMode(MODE_STDBY_RC);                              //ensure we leave function with TX off
 
@@ -1839,11 +1841,9 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
   }
 
   while (!digitalRead(_RXDonePin));    //Wait for DIO1 to go high
-  stopMs_g = micros();
-  Serial.println("Stop Time: ");
-  Serial.println(static_cast<float>(stopMs_g));
-  Serial.println(stopMs_g - startMs_g);
-
+  start_us = micros();
+  // Serial.println("Receive Time: ");
+  // Serial.println(static_cast<float>(start_us));
 
   setMode(MODE_STDBY_RC);              //ensure to stop further packet reception
   regdata = readIrqStatus();

@@ -30,13 +30,14 @@
 #include <SX128XLT.h>                            //include the appropriate library   
 #include "Settings.h"                            //include the setiings file, frequencies, LoRa settings etc   
 
+#define NUM_PACKETS_EXPECTED 6
 
 SX128XLT LT;                                     //create a library class instance called LT
 
 uint32_t RXpacketCount;
 uint32_t errors;
 
-uint8_t RXBUFFER[RXBUFFER_SIZE];                 //create the buffer that received packets are copied into
+uint8_t RXBUFFER[NUM_PACKETS_EXPECTED*RXBUFFER_SIZE];                 //create the buffer that received packets are copied into
 uint8_t TXBUFFER[RXBUFFER_SIZE];
 
 uint8_t RXPacketL;                               //stores length of packet received
@@ -44,10 +45,14 @@ int16_t  PacketRSSI;                             //stores RSSI of received packe
 
 uint8_t TXPacketL;
 uint32_t TXPacketCount, startmS, endmS;
+uint8_t NumPacketsReceived = 0;
+
+uint8_t RXPacketLs[NUM_PACKETS_EXPECTED];                               //stores length of packet received
+int16_t  PacketRSSIs[NUM_PACKETS_EXPECTED];                             //stores RSSI of received packet
 
 void loop()
 {
-  RXPacketL = LT.receive(RXBUFFER, RXBUFFER_SIZE, 10000, WAIT_RX); //wait for a packet to arrive with 10seconds (10000mS) timeout
+  RXPacketL = LT.receive(RXBUFFER + NumPacketsReceived*RXBUFFER_SIZE, RXBUFFER_SIZE, 15000, WAIT_RX); //wait for a packet to arrive with 10seconds (10000mS) timeout
 
   PacketRSSI = LT.readPacketRSSI();              //read the recived RSSI value
 
@@ -58,23 +63,35 @@ void loop()
   }
   else
   {
-    transmit_back();
-    rx_packet_is_OK();
+    RXPacketLs[NumPacketsReceived] = RXPacketL;
+    PacketRSSIs[NumPacketsReceived] = PacketRSSI;
+    NumPacketsReceived++;
+    if (NumPacketsReceived >= NUM_PACKETS_EXPECTED) {
+      process_received_packets();
+      NumPacketsReceived = 0;
+    }
   }
-
   // digitalWrite(LED1, LOW);                        //LED off
 
   Serial.println();
 }
 
-void transmit_back()
+void process_received_packets()
+{
+  for (uint8_t i = 0; i < NUM_PACKETS_EXPECTED; ++i)
+    // transmit_back(i);
+    rx_packet_is_OK(i);
+    Serial.println();
+}
+
+void transmit_back(uint8_t PacketNumber)
 {
   Serial.print(TXpower);                                       //print the transmit power defined
   Serial.print(F("dBm "));
   Serial.print(F("Packet> "));
   Serial.flush();
 
-  memcpy(TXBUFFER, RXBUFFER, RXBUFFER_SIZE);
+  memcpy(TXBUFFER, RXBUFFER + PacketNumber*RXBUFFER_SIZE, RXBUFFER_SIZE);
 
   TXPacketL = sizeof(TXBUFFER);                                    //set TXPacketL to length of array
   TXBUFFER[0] = '!';
@@ -82,7 +99,6 @@ void transmit_back()
 
   LT.printASCIIPacket(TXBUFFER, TXPacketL);                        //print the buffer (the sent packet) as ASCII
 
-  startmS =  millis();                                         //start transmit timer
   TXPacketL = LT.transmit(TXBUFFER, TXPacketL, Timeout, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
 
   if (TXPacketL > 0)
@@ -129,25 +145,26 @@ void tx_packet_is_Error()
   LT.printIrqStatus();                             //prints the text of which IRQs set
 }
 
-void rx_packet_is_OK()
+void rx_packet_is_OK(uint8_t PacketNumber)
 {
   uint16_t IRQStatus, localCRC;
-
+  uint8_t* RXBuffer_address = RXBUFFER + PacketNumber*RXBUFFER_SIZE;
+  
   IRQStatus = LT.readIrqStatus();                  //read the LoRa device IRQ status register
 
   RXpacketCount++;
 
   printElapsedTime();                              //print elapsed time to Serial Monitor
   Serial.print(F("  "));
-  LT.printASCIIPacket(RXBUFFER, RXPacketL);        //print the packet as ASCII characters
+  LT.printASCIIPacket(RXBuffer_address, RXPacketLs[PacketNumber]);        //print the packet as ASCII characters
 
-  localCRC = LT.CRCCCITT(RXBUFFER, RXPacketL, 0xFFFF);  //calculate the CRC, this is the external CRC calculation of the RXBUFFER
+  localCRC = LT.CRCCCITT(RXBuffer_address, RXPacketLs[PacketNumber], 0xFFFF);  //calculate the CRC, this is the external CRC calculation of the RXBUFFER
   Serial.print(F(",CRC,"));                        //contents, not the LoRa device internal CRC
   Serial.print(localCRC, HEX);
   Serial.print(F(",RSSI,"));
-  Serial.print(PacketRSSI);
+  Serial.print(PacketRSSIs[PacketNumber]);
   Serial.print(F("dB,Length,"));
-  Serial.print(RXPacketL);
+  Serial.print(RXPacketLs[PacketNumber]);
   Serial.print(F(",Packets,"));
   Serial.print(RXpacketCount);
   Serial.print(F(",Errors,"));
