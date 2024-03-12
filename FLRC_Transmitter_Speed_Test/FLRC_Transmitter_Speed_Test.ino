@@ -75,21 +75,22 @@ void loop() {
     Serial.print("You entered '1'. Proceeding...\n");
     Serial.println();
 
-    TXPacketL = LT.transmit(buff, TXPacketL, 10000, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
+    for (int i = 0; i < 6; i++){
+      TXPacketL = LT.transmit(buff, TXPacketL, 10000, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
   
-    if (TXPacketL > 0) {
-      endmS = millis();  //packet sent, note end time
-      TXPacketCount++;
-      packet_is_OK_transmit();
-    } else {
-      packet_is_Error_transmit();  //transmit packet returned 0, so there was an error
+      if (TXPacketL > 0) {
+        packet_is_OK_transmit();
+      } else {
+        packet_is_Error_transmit();  //transmit packet returned 0, so there was an error
+      }
     }
+
 
     //Receiving Code
     Serial.println();
     Serial.print("Checking if received a return packet");
     Serial.println();
-    
+
     RXPacketL = LT.receive(RXBUFFER, RXBUFFER_SIZE, 10000, WAIT_RX); //wait for a packet to arrive with 1seconds (1s) timeout
     PacketRSSI = LT.readPacketRSSI();              //read the recived RSSI value
     if (RXPacketL == 0)                            //if the LT.receive() function detects an error, RXpacketL == 0
@@ -100,6 +101,8 @@ void loop() {
     {
       packet_is_OK_recieve();
     }
+  
+  
 
     Serial.println();
 

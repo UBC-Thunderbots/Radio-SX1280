@@ -1531,7 +1531,7 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
   
   //Put into transmit mode
   startMs_g = micros();
-  //Serial.println("Start time: ");
+  Serial.println("Start time: ");
   Serial.print(static_cast<float>(startMs_g));
   setTx(timeout);                                                            //this starts the TX
 
@@ -1840,7 +1840,7 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
 
   while (!digitalRead(_RXDonePin));    //Wait for DIO1 to go high
   stopMs_g = micros();
-  //Serial.println("Stop Time: ");
+  Serial.println("Stop Time: ");
   Serial.println(static_cast<float>(stopMs_g));
   Serial.println(stopMs_g - startMs_g);
 
