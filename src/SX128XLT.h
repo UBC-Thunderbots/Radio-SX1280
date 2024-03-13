@@ -93,6 +93,13 @@ class SX128XLT  {
     void setPeriodBase(uint8_t value);
     uint8_t getPeriodBase();
 
+    //***************************************************************************
+    //Start custom routines
+    //***************************************************************************
+    uint8_t getNumPacketsReceived();
+    uint8_t getNumPacketsSent();
+    void resetNumPacketsReceived();
+    void resetNumPacketsSent();    
 
     //***************************************************************************
     //Start direct access SX buffer routines

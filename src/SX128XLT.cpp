@@ -39,6 +39,8 @@
 //Global Time Variables
 uint32_t start_us;
 uint32_t stop_us;
+uint8_t num_received = 0;
+uint8_t num_sent = 0;
 
 SX128XLT::SX128XLT()
 {
@@ -1538,11 +1540,6 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
   }
 
   while (!digitalRead(_TXDonePin));                    //Wait for DIO1 to go high
-  
-  stop_us = micros();
-  Serial.println("Transmit done time: ");
-  // Serial.println(static_cast<float>(stop_us));
-  Serial.println(stop_us-start_us);
 
   setMode(MODE_STDBY_RC);                              //ensure we leave function with TX off
 
@@ -1550,10 +1547,17 @@ uint8_t SX128XLT::transmit(uint8_t *txbuffer, uint8_t size, uint16_t timeout, in
   {
     return 0;
   }
-  else
+
+  num_sent++; // we have sent the next packet, so increment the count
+  if (num_sent >= 6)
   {
-    return _TXPacketL;
+    num_sent = 0; // reset counter
+    Serial.print("Receiver Processing Time: ");
+    stop_us = micros(); // at this point we have sent all 6 packets
+    Serial.println(stop_us-start_us); // print the receiver processing time
   }
+
+  return _TXPacketL;
 }
 
 
@@ -1821,6 +1825,25 @@ uint16_t SX128XLT::CRCCCITT(uint8_t *buffer, uint32_t size, uint16_t start)
   return libraryCRC;
 }
 
+uint8_t SX128XLT::getNumPacketsReceived()
+{
+  return num_received;
+}
+
+uint8_t SX128XLT::getNumPacketsSent()
+{
+  return num_sent;
+}
+
+void SX128XLT::resetNumPacketsReceived()
+{
+  num_received = 0;
+}
+
+void SX128XLT::resetNumPacketsSent()
+{
+  num_sent = 0;
+}
 
 uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uint8_t wait)
 {
@@ -1841,9 +1864,6 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
   }
 
   while (!digitalRead(_RXDonePin));    //Wait for DIO1 to go high
-  start_us = micros();
-  // Serial.println("Receive Time: ");
-  // Serial.println(static_cast<float>(start_us));
 
   setMode(MODE_STDBY_RC);              //ensure to stop further packet reception
   regdata = readIrqStatus();
@@ -1851,6 +1871,13 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
   if ( (regdata & IRQ_HEADER_ERROR) | (regdata & IRQ_CRC_ERROR) | (regdata & IRQ_RX_TX_TIMEOUT ) | (regdata & IRQ_SYNCWORD_ERROR )) //check if any of the preceding IRQs is set
   {
     return 0;                          //packet is errored somewhere so return 0
+  }
+
+  num_received++; // we have received the next non-errored packet, so increment the count
+  if (num_received >= 6)
+  {
+    start_us = micros(); // at this point we have received all 6 packets
+    // num_received will get reset by the .ino file, once it's done processing the RXBuffer 
   }
 
   readCommand(RADIO_GET_RXBUFFERSTATUS, buffer, 2);
@@ -1891,7 +1918,7 @@ uint8_t SX128XLT::receive(uint8_t *rxbuffer, uint8_t size, uint16_t timeout, uin
   // Serial.print("Round trip time: ");
   // Serial.print(static_cast<float>(stopMs_g - startMs_g));
   // Serial.println();
-
+  
   return _RXPacketL;
 }
 

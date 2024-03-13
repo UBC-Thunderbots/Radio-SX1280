@@ -38,20 +38,21 @@ uint32_t RXpacketCount;
 uint32_t errors;
 
 uint8_t RXBUFFER[NUM_PACKETS_EXPECTED*RXBUFFER_SIZE];                 //create the buffer that received packets are copied into
-uint8_t TXBUFFER[RXBUFFER_SIZE];
+uint8_t TXBUFFER[NUM_PACKETS_EXPECTED*RXBUFFER_SIZE];
 
 uint8_t RXPacketL;                               //stores length of packet received
 int16_t  PacketRSSI;                             //stores RSSI of received packet
 
 uint8_t TXPacketL;
 uint32_t TXPacketCount, startmS, endmS;
-uint8_t NumPacketsReceived = 0;
+uint8_t NumPacketsReceived;
 
 uint8_t RXPacketLs[NUM_PACKETS_EXPECTED];                               //stores length of packet received
 int16_t  PacketRSSIs[NUM_PACKETS_EXPECTED];                             //stores RSSI of received packet
 
 void loop()
 {
+  NumPacketsReceived = LT.getNumPacketsReceived();
   RXPacketL = LT.receive(RXBUFFER + NumPacketsReceived*RXBUFFER_SIZE, RXBUFFER_SIZE, 15000, WAIT_RX); //wait for a packet to arrive with 10seconds (10000mS) timeout
 
   PacketRSSI = LT.readPacketRSSI();              //read the recived RSSI value
@@ -61,72 +62,71 @@ void loop()
     Serial.println("RXPacketL == 0");
     rx_packet_is_Error();
   }
-  else
+  else // doing the bare minimum to save each packet's status and check if we're done
   {
     RXPacketLs[NumPacketsReceived] = RXPacketL;
     PacketRSSIs[NumPacketsReceived] = PacketRSSI;
-    NumPacketsReceived++;
+
+    NumPacketsReceived = LT.getNumPacketsReceived(); // read again since it was incremented
     if (NumPacketsReceived >= NUM_PACKETS_EXPECTED) {
-      process_received_packets();
-      NumPacketsReceived = 0;
+      // process each packet that was sent
+      for (uint8_t i = 0; i < NumPacketsReceived; ++i)
+        rx_packet_is_OK(i);
+        
+      LT.resetNumPacketsReceived(); // reset the counter
+      transmit_back(); // send back a response for each of the packets that was sent
     }
   }
-  // digitalWrite(LED1, LOW);                        //LED off
 
   Serial.println();
 }
 
-void process_received_packets()
+void transmit_packet(uint8_t PacketNumber)
 {
-  for (uint8_t i = 0; i < NUM_PACKETS_EXPECTED; ++i)
-    // transmit_back(i);
-    rx_packet_is_OK(i);
-    Serial.println();
+  TXBUFFER[PacketNumber*RXBUFFER_SIZE + PacketNumber] = '!';
+  uint8_t* TXBufferAddress = TXBUFFER + PacketNumber*RXBUFFER_SIZE;
+
+  LT.printASCIIPacket(TXBufferAddress, TXPacketL);                        //print the buffer (the sent packet) as ASCII
+  TXPacketL = LT.transmit(TXBufferAddress, TXPacketL, Timeout, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
+
+  if (TXPacketL == 0)
+    tx_packet_is_Error();                                 //transmit packet returned 0, so there was an error
+  else
+  {
+    TXPacketCount++;
+    tx_packet_is_OK(PacketNumber);
+  }
 }
 
-void transmit_back(uint8_t PacketNumber)
+void transmit_back()
 {
   Serial.print(TXpower);                                       //print the transmit power defined
   Serial.print(F("dBm "));
   Serial.print(F("Packet> "));
   Serial.flush();
 
-  memcpy(TXBUFFER, RXBUFFER + PacketNumber*RXBUFFER_SIZE, RXBUFFER_SIZE);
+  memcpy(TXBUFFER, RXBUFFER, NUM_PACKETS_EXPECTED*RXBUFFER_SIZE);
+  TXPacketL = RXBUFFER_SIZE;                                    //set TXPacketL to length of array
 
-  TXPacketL = sizeof(TXBUFFER);                                    //set TXPacketL to length of array
-  TXBUFFER[0] = '!';
-  TXBUFFER[TXPacketL - 1] = '*';                                   //replace null character at buffer end so its visible on reciver
-
-  LT.printASCIIPacket(TXBUFFER, TXPacketL);                        //print the buffer (the sent packet) as ASCII
-
-  TXPacketL = LT.transmit(TXBUFFER, TXPacketL, Timeout, TXpower, WAIT_TX);  //will return 0 if transmit fails, timeout 10 seconds
-
-  if (TXPacketL > 0)
+  for (uint8_t i = 0; i < NUM_PACKETS_EXPECTED; ++i)
   {
-    endmS = millis();                                          //packet sent, note end time
-    TXPacketCount++;
-    tx_packet_is_OK();
-  }
-  else
-  {
-    tx_packet_is_Error();                                 //transmit packet returned 0, so there was an error
+    transmit_packet(i);
   }
 
   Serial.println();
 }
 
-void tx_packet_is_OK()
+void tx_packet_is_OK(uint8_t PacketNumber)
 {
   //if here packet has been sent OK
   uint16_t localCRC;
+  uint8_t* TXBufferAddress = TXBUFFER + PacketNumber*RXBUFFER_SIZE;
 
   Serial.print(F("  BytesSent,"));
   Serial.print(TXPacketL);                             //print transmitted packet length
-  localCRC = LT.CRCCCITT(TXBUFFER, TXPacketL, 0xFFFF);
+  localCRC = LT.CRCCCITT(TXBufferAddress, TXPacketL, 0xFFFF);
   Serial.print(F("  CRC,"));
   Serial.print(localCRC, HEX);                              //print CRC of sent packet
-  Serial.print(F("  TransmitTime,"));
-  Serial.print(endmS - startmS);                       //print transmit time of packet
   Serial.print(F("mS"));
   Serial.print(F("  PacketsSent,"));
   Serial.print(TXPacketCount);                         //print total of packets sent OK
