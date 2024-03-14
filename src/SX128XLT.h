@@ -93,6 +93,12 @@ class SX128XLT  {
     void setPeriodBase(uint8_t value);
     uint8_t getPeriodBase();
 
+    void packet_is_OK_transmit();
+    void packet_is_Error_transmit();     
+    void packet_is_OK_recieve();
+    void packet_is_Error_recieve();
+    
+
     //***************************************************************************
     //Start custom routines
     //***************************************************************************

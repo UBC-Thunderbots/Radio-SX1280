@@ -26,11 +26,14 @@
 #include <SX128XLT.h>  //include the appropriate library
 #include "Settings.h"  //include the setiings file, frequencies, LoRa settings etc
 
+#define NUM_PACKETS_EXPECTED 6
+
 SX128XLT LT;  //create a library class instance called LT
 
 //TX
 uint8_t TXPacketL;
 uint32_t TXPacketCount, startmS, endmS;
+uint8_t NumPacketsReceived;
 
 //RX
 uint8_t RXBUFFER[RXBUFFER_SIZE];                 //create the buffer that received packets are copied into
@@ -38,10 +41,18 @@ uint8_t RXPacketL;                               //stores length of packet recei
 int16_t  PacketRSSI;                             //stores RSSI of received packet
 uint32_t RXpacketCount;
 uint32_t errors;
+uint8_t RXPacketLs[NUM_PACKETS_EXPECTED];                               //stores length of packet received
+int16_t  PacketRSSIs[NUM_PACKETS_EXPECTED];                             //stores RSSI of received packet
 
 //User Input Variable
 char userInput;
 uint8_t buff[RXBUFFER_SIZE];
+
+
+void packet_is_OK_transmit();
+void packet_is_Error_transmit();     
+void packet_is_OK_recieve();
+void packet_is_Error_recieve();
 
 void loop() {
   Serial.print(TXpower);  //print the transmit power defined
@@ -87,42 +98,43 @@ void loop() {
       }
 
     }
+    
+    //Receiving Packet Code
+    NumPacketsReceived = LT.getNumPacketsReceived();
+    for (int i = NumPacketsReceived; i < NUM_PACKETS_EXPECTED; i = LT.getNumPacketsReceived()) {
+      RXPacketL = LT.receive(RXBUFFER + NumPacketsReceived*RXBUFFER_SIZE, RXBUFFER_SIZE, 15000, WAIT_RX); //wait for a packet to arrive with 10seconds (10000mS) timeout
 
+      PacketRSSI = LT.readPacketRSSI();              //read the recived RSSI value
 
-    //Receiving Code
-    Serial.println();
-    Serial.print("Checking if received a return packet");
-    Serial.println();
+      if (RXPacketL == 0)                            //if the LT.receive() function detects an error, RXpacketL == 0
+      {
+        Serial.println("RXPacketL == 0");
+        rx_packet_is_Error();
+      }
+      else // doing the bare minimum to save each packet's status and check if we're done
+      {
+        RXPacketLs[NumPacketsReceived] = RXPacketL;
+        PacketRSSIs[NumPacketsReceived] = PacketRSSI;
 
-    RXPacketL = LT.receive(RXBUFFER, RXBUFFER_SIZE, 10000, WAIT_RX); //wait for a packet to arrive with 1seconds (1s) timeout
-    PacketRSSI = LT.readPacketRSSI();              //read the recived RSSI value
-    if (RXPacketL == 0)                            //if the LT.receive() function detects an error, RXpacketL == 0
-    {
-      packet_is_Error_recieve();
+        NumPacketsReceived = LT.getNumPacketsReceived(); // read again since it was incremented
+      }
+
+      Serial.println();
     }
-    else
-    {
-      packet_is_OK_recieve();
-    }
-  
-  
+    
 
-    Serial.println();
-
+    
   }
   else{
 
-    Serial.println();
-    Serial.print("Exiting, failed to press 1");
-    Serial.println();
-    return;
+      Serial.println();
+      Serial.print("Exiting, failed to press 1");
+      Serial.println();
+      return;
 
   }
   
-
-  //digitalWrite(LED1, LOW);
   Serial.println();
-  delay(packet_delay);  //have a delay between packets
 }
 
 
@@ -155,25 +167,26 @@ void packet_is_Error_transmit() {
   LT.printIrqStatus();           //prints the text of which IRQs set
 }
 
-void packet_is_OK_recieve()
+void rx_packet_is_OK(uint8_t PacketNumber)
 {
   uint16_t IRQStatus, localCRC;
-
+  uint8_t* RXBuffer_address = RXBUFFER + PacketNumber*RXBUFFER_SIZE;
+  
   IRQStatus = LT.readIrqStatus();                  //read the LoRa device IRQ status register
 
   RXpacketCount++;
 
-  //printElapsedTime();                              //print elapsed time to Serial Monitor
+  printElapsedTime();                              //print elapsed time to Serial Monitor
   Serial.print(F("  "));
-  LT.printASCIIPacket(RXBUFFER, RXPacketL);        //print the packet as ASCII characters
+  LT.printASCIIPacket(RXBuffer_address, RXPacketLs[PacketNumber]);        //print the packet as ASCII characters
 
-  localCRC = LT.CRCCCITT(RXBUFFER, RXPacketL, 0xFFFF);  //calculate the CRC, this is the external CRC calculation of the RXBUFFER
+  localCRC = LT.CRCCCITT(RXBuffer_address, RXPacketLs[PacketNumber], 0xFFFF);  //calculate the CRC, this is the external CRC calculation of the RXBUFFER
   Serial.print(F(",CRC,"));                        //contents, not the LoRa device internal CRC
   Serial.print(localCRC, HEX);
   Serial.print(F(",RSSI,"));
-  Serial.print(PacketRSSI);
+  Serial.print(PacketRSSIs[PacketNumber]);
   Serial.print(F("dB,Length,"));
-  Serial.print(RXPacketL);
+  Serial.print(RXPacketLs[PacketNumber]);
   Serial.print(F(",Packets,"));
   Serial.print(RXpacketCount);
   Serial.print(F(",Errors,"));
@@ -182,12 +195,13 @@ void packet_is_OK_recieve()
   Serial.print(IRQStatus, HEX);
 }
 
-void packet_is_Error_recieve()
+
+void rx_packet_is_Error()
 {
   uint16_t IRQStatus;
   IRQStatus = LT.readIrqStatus();                   //read the LoRa device IRQ status register
 
-  //printElapsedTime();                               //print elapsed time to Serial Monitor
+  printElapsedTime();                               //print elapsed time to Serial Monitor
 
   if (IRQStatus & IRQ_RX_TIMEOUT)                   //check for an RX timeout
   {
@@ -212,6 +226,15 @@ void packet_is_Error_recieve()
 
 
 }
+
+void printElapsedTime()
+{
+  float seconds;
+  seconds = millis() / 1000;
+  Serial.print(seconds, 0);
+  Serial.print(F("s"));
+}
+
 
 void led_Flash(uint16_t flashes, uint16_t delaymS) {
   uint16_t index;
