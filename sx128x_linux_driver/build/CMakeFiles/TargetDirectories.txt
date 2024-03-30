@@ -1,0 +1,16 @@
+/home/robot/Documents/sx128x_linux_driver/build/CMakeFiles/sx128x_linux_driver.dir
+/home/robot/Documents/sx128x_linux_driver/build/CMakeFiles/SX128x_Test.dir
+/home/robot/Documents/sx128x_linux_driver/build/CMakeFiles/edit_cache.dir
+/home/robot/Documents/sx128x_linux_driver/build/CMakeFiles/rebuild_cache.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sx128x_driver-build/CMakeFiles/sx128x_driver.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sx128x_driver-build/CMakeFiles/SX128x_ToA_Test.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sx128x_driver-build/CMakeFiles/edit_cache.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sx128x_driver-build/CMakeFiles/rebuild_cache.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-build/CMakeFiles/GPIOPlusPlus.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-build/CMakeFiles/GPIOPlusPlus_Test.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-build/CMakeFiles/edit_cache.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-build/CMakeFiles/rebuild_cache.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-build/CMakeFiles/SPPI.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-build/CMakeFiles/SPPI_Test.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-build/CMakeFiles/edit_cache.dir
+/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-build/CMakeFiles/rebuild_cache.dir

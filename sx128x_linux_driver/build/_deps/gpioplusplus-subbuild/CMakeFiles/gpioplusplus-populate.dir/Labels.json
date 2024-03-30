@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/CMakeFiles/gpioplusplus-populate"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/CMakeFiles/gpioplusplus-populate.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/CMakeFiles/gpioplusplus-populate-complete.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-build.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-configure.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-download.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-install.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-patch.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-test.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/gpioplusplus-populate-prefix/src/gpioplusplus-populate-stamp/gpioplusplus-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"gpioplusplus-populate"
+		],
+		"name" : "gpioplusplus-populate"
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/CMakeFiles/sppi-populate"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/CMakeFiles/sppi-populate.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/CMakeFiles/sppi-populate-complete.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-build.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-configure.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-download.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-install.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-patch.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-test.rule"
+		},
+		{
+			"file" : "/home/robot/Documents/sx128x_linux_driver/build/_deps/sppi-subbuild/sppi-populate-prefix/src/sppi-populate-stamp/sppi-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"sppi-populate"
+		],
+		"name" : "sppi-populate"
+	}
+}

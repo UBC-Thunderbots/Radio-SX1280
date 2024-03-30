@@ -1,0 +1,2 @@
+/usr/bin/ar qc libGPIOPlusPlus.a CMakeFiles/GPIOPlusPlus.dir/GPIO++.cpp.o CMakeFiles/GPIOPlusPlus.dir/Utils.cpp.o
+/usr/bin/ranlib libGPIOPlusPlus.a
