@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/SX128x_Test.dir/Test.cpp.o -o SX128x_Test  libsx128x_linux_driver.a -lpthread _deps/gpioplusplus-build/libGPIOPlusPlus.a _deps/sppi-build/libSPPI.a _deps/sx128x_driver-build/libsx128x_driver.a

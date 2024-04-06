@@ -1,2 +1,0 @@
-/usr/bin/ar qc libsx128x_driver.a CMakeFiles/sx128x_driver.dir/SX128x.cpp.o
-/usr/bin/ranlib libsx128x_driver.a

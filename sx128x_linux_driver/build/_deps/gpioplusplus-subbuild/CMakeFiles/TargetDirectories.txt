@@ -1,3 +1,0 @@
-/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/CMakeFiles/gpioplusplus-populate.dir
-/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/CMakeFiles/edit_cache.dir
-/home/robot/Documents/sx128x_linux_driver/build/_deps/gpioplusplus-subbuild/CMakeFiles/rebuild_cache.dir

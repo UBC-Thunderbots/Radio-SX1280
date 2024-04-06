@@ -36,15 +36,22 @@ int main(int argc, char **argv) {
 	// Customize these pins by yourself
 	SX128x_Linux Radio("/dev/spidev1.1", 0,
 			   {
-				   12, 11, 16,
-				   15, -1, -1,
-				   22, 37
-			   }
+				   78, 77, 232,
+				   216, -1, -1,
+				   12, 13
+			   } //40, 38, 16, 7, -1, -1, 37, 22 , 
+				/*
+				40 = BUSY = gpio78ls 
+				38 = RST = gpio77  might need to swtich to 36 = gpio51
+				16 = NSS = gpio232
+				7 = DIO1 = gpio216
+				37 = MOSI = gpio12
+				22 = MISO = gpio13*/
 	);
 
 	// Assume we're running on a high-end Raspberry Pi,
 	// so we set the SPI clock speed to the maximum value supported by the chip
-	Radio.SetSpiSpeed(8000000);
+	Radio.SetSpiSpeed(3000000);
 
 	Radio.Init();
 	puts("Init done");
@@ -54,7 +61,7 @@ int main(int argc, char **argv) {
 	puts("SetRegulatorMode done");
 	Radio.SetLNAGainSetting(SX128x::LNA_HIGH_SENSITIVITY_MODE);
 	puts("SetLNAGainSetting done");
-	Radio.SetTxParams(0, SX128x::RADIO_RAMP_20_US);
+	Radio.SetTxParams(0, SX128x::RADIO_RAMP_04_US);
 	puts("SetTxParams done");
 
 	Radio.SetBufferBaseAddresses(0x00, 0x00);
@@ -82,16 +89,16 @@ int main(int argc, char **argv) {
 	} else {
 		ModulationParams.PacketType = SX128x::PACKET_TYPE_FLRC;
 		auto &p = ModulationParams.Params.Flrc;
-		p.CodingRate = SX128x::FLRC_CR_1_2;
-		p.BitrateBandwidth = SX128x::FLRC_BR_0_325_BW_0_3;
-		p.ModulationShaping = SX128x::RADIO_MOD_SHAPING_BT_OFF;
+		p.CodingRate = SX128x::FLRC_CR_1_0;
+		p.BitrateBandwidth = SX128x::FLRC_BR_1_300_BW_1_2;
+		p.ModulationShaping = SX128x::RADIO_MOD_SHAPING_BT_1_0;
 
 
 		PacketParams.PacketType = SX128x::PACKET_TYPE_FLRC;
 		auto &l = PacketParams.Params.Flrc;
 		l.PayloadLength = 127;
 		l.HeaderType = SX128x::RADIO_PACKET_VARIABLE_LENGTH;
-		l.PreambleLength = SX128x::PREAMBLE_LENGTH_32_BITS;
+		l.PreambleLength = SX128x::PREAMBLE_LENGTH_08_BITS;
 		l.CrcLength = SX128x::RADIO_CRC_OFF;
 		l.SyncWordLength = SX128x::FLRC_SYNCWORD_LENGTH_4_BYTE;
 		l.SyncWordMatch = SX128x::RADIO_RX_MATCH_SYNCWORD_1;
@@ -107,18 +114,20 @@ int main(int argc, char **argv) {
 	puts("SetPacketParams done");
 
 	auto freq = strtol(argv[3], nullptr, 10);
-	Radio.SetRfFrequency(freq * 1000000UL);
+	//Radio.SetRfFrequency(freq * 1000000UL);
+	Radio.SetRfFrequency(2420000000UL);
 	puts("SetRfFrequency done");
 
 	if (modmode == 1) {
 		// only used in GFSK, FLRC (4 bytes max) and BLE mode
-		uint8_t sw[] = {0xDD, 0xA0, 0x96, 0x69, 0xDD};
+		// uint8_t sw[] = {0xDD, 0xA0, 0x96, 0x69, 0xDD};
+		uint8_t sw[] = {0xDD, 0xA0, 0x96, 0x69}; // Adjusted to 4 bytes for FLRC
 		Radio.SetSyncWord(1, sw);
 		// only used in GFSK, FLRC
 		uint8_t crcSeedLocal[2] = {0x45, 0x67};
-		Radio.SetCrcSeed(crcSeedLocal);
-		Radio.SetCrcPolynomial(0x0123);
-//		Radio.SetWhiteningSeed(0x22);
+		Radio.SetCrcSeed(crcSeedLocal); //?
+		Radio.SetCrcPolynomial(0x0123); //?
+//		Radio.SetWhiteningSeed(0x22);   //?
 	}
 
 	std::cout << Radio.GetFirmwareVersion() << "\n";
@@ -175,8 +184,24 @@ int main(int argc, char **argv) {
 	};
 
 	auto IrqMask = SX128x::IRQ_RX_DONE | SX128x::IRQ_TX_DONE | SX128x::IRQ_RX_TX_TIMEOUT;
-	Radio.SetDioIrqParams(IrqMask, IrqMask, SX128x::IRQ_RADIO_NONE, SX128x::IRQ_RADIO_NONE);
+	Radio.SetDioIrqParams(SX128x::IRQ_RADIO_ALL, IrqMask, SX128x::IRQ_RADIO_NONE, SX128x::IRQ_RADIO_NONE);
 	puts("SetDioIrqParams done");
+	
+	/*********************************
+	Added configuration
+	*********************************/
+	// setSyncWordErrorTolerance
+	
+
+	// SetAutoFS
+	Radio.SetAutoFs(true);
+
+	// SetFS
+	Radio.SetFs();
+
+	// setFLRCPayloadLengthReg
+
+
 
 	Radio.StartIrqHandler();
 	puts("StartIrqHandler done");

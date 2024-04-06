@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSPPI.a CMakeFiles/SPPI.dir/SPPI.cpp.o
-/usr/bin/ranlib libSPPI.a

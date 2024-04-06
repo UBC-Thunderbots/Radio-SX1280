@@ -20,7 +20,7 @@
 
 SX128x_Linux::SX128x_Linux(const std::string &spi_dev_path, uint16_t gpio_dev_num, SX128x_Linux::PinConfig pin_config) :
 	pin_cfg(pin_config),
-	RadioSpi(spi_dev_path, SPI_MODE_0|SPI_NO_CS, 8, 500000),
+	RadioSpi(spi_dev_path, SPI_MODE_0, 8, 500000), // Removed |SPI_NO_CS
 	RadioGpio(gpio_dev_num),
 	Busy(RadioGpio.line(pin_cfg.busy, GPIO::LineMode::Input, 0, "SX128x BUSY")),
 	RadioNss(RadioGpio.line(pin_cfg.nss, GPIO::LineMode::Output, 1, "SX128x NSS")),

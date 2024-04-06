@@ -1,1 +1,0 @@
-/usr/bin/c++ -rdynamic CMakeFiles/GPIOPlusPlus_Test.dir/test.cpp.o -o GPIOPlusPlus_Test  libGPIOPlusPlus.a -lpthread
