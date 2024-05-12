@@ -10,7 +10,7 @@
 #define NSS 5                                   //select pin on LoRa device
 #define SCK 18                                  //SCK on SPI3
 #define MISO 19                                 //MISO on SPI3 
-#define MOSI 23                                 //MOSI on SPI3 
+#define MOSI 23                                 //MOSI on SPI3
 
 #define NRESET 27                               //reset pin on LoRa device
 #define RFBUSY 25                               //busy line

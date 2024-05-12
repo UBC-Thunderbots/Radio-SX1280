@@ -1,3 +1,43 @@
+#include <AFSKRTTY.h>
+#include <AFSKRTTY2.h>
+#include <ARtransfer.h>
+#include <ARtransferIRQ.h>
+#include <AtmelSleep.h>
+#include <DTSDlibrary.h>
+#include <EEPROM_Memory.h>
+#include <FRAM_FM24CL64.h>
+#include <FRAM_MB85RC16PNF.h>
+#include <ProgramLT_Definitions.h>
+#include <SDtransfer.h>
+#include <SDtransferIRQ.h>
+#include <SX126XLT.h>
+#include <SX126XLT_Definitions.h>
+#include <SX127XLT.h>
+#include <SX127XLT_Definitions.h>
+#include <SX128XLT.h>
+#include <SX128XLT_Definitions.h>
+#include <arrayRW.h>
+
+#include <AFSKRTTY.h>
+#include <AFSKRTTY2.h>
+#include <ARtransfer.h>
+#include <ARtransferIRQ.h>
+#include <AtmelSleep.h>
+#include <DTSDlibrary.h>
+#include <EEPROM_Memory.h>
+#include <FRAM_FM24CL64.h>
+#include <FRAM_MB85RC16PNF.h>
+#include <ProgramLT_Definitions.h>
+#include <SDtransfer.h>
+#include <SDtransferIRQ.h>
+#include <SX126XLT.h>
+#include <SX126XLT_Definitions.h>
+#include <SX127XLT.h>
+#include <SX127XLT_Definitions.h>
+#include <SX128XLT.h>
+#include <SX128XLT_Definitions.h>
+#include <arrayRW.h>
+
 /*******************************************************************************************************
   Programs for Arduino - Copyright of the author Stuart Robinson - 29/09/21
 
