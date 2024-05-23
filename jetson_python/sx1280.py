@@ -480,6 +480,7 @@ class SX1280:
 
         zeros = [0x00 for i in range(payloadLen)]
 
+        # The readBuffer command begins returning the contents of RXBUFFER _RXBUFFER_OFFSET clock cycles after the command is sent.
         self._sendCommand(bytes([_RADIO_READ_BUFFER, offset] + zeros))
         rxBuffer = self._BUFFER[_RXBUFFER_OFFSET : _RXBUFFER_OFFSET + (payloadLen-1)]
 

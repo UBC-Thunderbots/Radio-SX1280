@@ -5,7 +5,7 @@ import busio
 import digitalio
 from time import sleep
 
-import sx1280
+import sx1280_light as sx1280
 
 # NAME    PIN #    LABEL    ALT FUNCTION
 # -----------------------------------
@@ -35,7 +35,7 @@ print("configured BUSY pin")
 DIO2 = digitalio.DigitalInOut(board.D4)
 
 # None cs for now since it already uses the CS0 default
-radio = sx1280.SX1280(spi, None, RESET, BUSY, DIO2, 2.445)
+radio = sx1280.SX1280(spi, None, RESET, BUSY, DIO2, 2.420) # for LoRa - 2.445 GHz; for FLRC, was using 2.42GHz for some reason
 
 print("Configured the radio")
 print()
@@ -51,6 +51,8 @@ while True:
     payload = radio.receive()
     if payload != None:
         payloadLen = len(payload)
+        print("Payload received: ")
         print(payload)
+        print()
         # print(radio.packet_status)
         # sleep(1)

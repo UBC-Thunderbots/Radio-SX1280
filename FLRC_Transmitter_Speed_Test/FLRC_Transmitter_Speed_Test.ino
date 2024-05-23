@@ -1,43 +1,3 @@
-#include <AFSKRTTY.h>
-#include <AFSKRTTY2.h>
-#include <ARtransfer.h>
-#include <ARtransferIRQ.h>
-#include <AtmelSleep.h>
-#include <DTSDlibrary.h>
-#include <EEPROM_Memory.h>
-#include <FRAM_FM24CL64.h>
-#include <FRAM_MB85RC16PNF.h>
-#include <ProgramLT_Definitions.h>
-#include <SDtransfer.h>
-#include <SDtransferIRQ.h>
-#include <SX126XLT.h>
-#include <SX126XLT_Definitions.h>
-#include <SX127XLT.h>
-#include <SX127XLT_Definitions.h>
-#include <SX128XLT.h>
-#include <SX128XLT_Definitions.h>
-#include <arrayRW.h>
-
-#include <AFSKRTTY.h>
-#include <AFSKRTTY2.h>
-#include <ARtransfer.h>
-#include <ARtransferIRQ.h>
-#include <AtmelSleep.h>
-#include <DTSDlibrary.h>
-#include <EEPROM_Memory.h>
-#include <FRAM_FM24CL64.h>
-#include <FRAM_MB85RC16PNF.h>
-#include <ProgramLT_Definitions.h>
-#include <SDtransfer.h>
-#include <SDtransferIRQ.h>
-#include <SX126XLT.h>
-#include <SX126XLT_Definitions.h>
-#include <SX127XLT.h>
-#include <SX127XLT_Definitions.h>
-#include <SX128XLT.h>
-#include <SX128XLT_Definitions.h>
-#include <arrayRW.h>
-
 /*******************************************************************************************************
   Programs for Arduino - Copyright of the author Stuart Robinson - 29/09/21
 
@@ -81,7 +41,8 @@ uint32_t errors;
 
 //User Input Variable
 char userInput;
-uint8_t buff[RXBUFFER_SIZE];
+// uint8_t buff[RXBUFFER_SIZE];
+uint8_t buff[] = "1234567890";
 
 void loop() {
   Serial.print(TXpower);  //print the transmit power defined
@@ -89,9 +50,9 @@ void loop() {
   Serial.print(F("Packet> "));
   Serial.flush();
 
-  for (int i = 0; i < RXBUFFER_SIZE; ++i) {
-    buff[i] = 'A';
-  }
+  // for (int i = 0; i < RXBUFFER_SIZE; ++i) {
+  //   buff[i] = 'A';
+  // }
 
   TXPacketL = sizeof(buff);   //set TXPacketL to length of array
   buff[TXPacketL - 1] = '*';  //replace null character at buffer end so its visible on reciver
