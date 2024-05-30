@@ -248,7 +248,7 @@ void setup()
   //***************************************************************************************************
   //Setup FLRC
   //***************************************************************************************************
-  LT.setSleep(RETAIN_None);
+  LT.setSleep(RETAIN_None); // TODO: tara - is this needed?
   LT.setMode(MODE_STDBY_XOSC);
   LT.setRegulatorMode(USE_DCDC);
   LT.setPacketType(PACKET_TYPE_FLRC);

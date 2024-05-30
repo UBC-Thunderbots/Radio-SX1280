@@ -27,7 +27,7 @@ _RADIO_GET_PACKETTYPE               = const(0x03)
 _RADIO_SET_RFFREQUENCY              = const(0x86)
 _RADIO_SET_TXPARAMS                 = const(0x8E)
 _RADIO_SET_CADPARAMS                = const(0x88)
-_RADIO_SET_BUFFERBASEADDRESS        = const(0x8F)
+_RADIO_SET_BUFFERBASEADDRESS        = const(0x00)#= const(0x8F)
 RADIO_SET_MODULATIONPARAMS         = const(0x8B)
 RADIO_SET_PACKETPARAMS             = const(0x8C)
 _RADIO_GET_RXBUFFERSTATUS           = const(0x17)
@@ -98,7 +98,7 @@ RADIO_PACKET_VARIABLE_LENGTH       = const(0x20)
 PACKET_TYPE_FLRC                   = const(0x03)
 RADIO_WHITENING_OFF                = const(0x08)
 RADIO_RAMP_04_US                   = const(0x20)
-RXBUFFER_SIZE                      = const(0x7F)
+RXBUFFER_SIZE                      = const(0x7F)   # 127 bytes length payload
 RETAIN_None                        = const(0x00)   # Sleep mode
 FLRC_BR_1_300_BW_1_2               = const(0x45)   # FLRC modparam1: bandwidth and bit rate, 1.3Mbs
 FLRC_CR_1_0                        = const(0x04)   # FLRC modparam2: coding rate
@@ -107,4 +107,4 @@ RADIO_CRC_OFF                      = const(0x00)
 
 # REGISTERS
 REG_LR_FLRCPAYLOADLENGTH           = [0x09, 0xC3]
-REG_FLRCSYNCWORD1_BASEADDR         = [0x09, 0xCF]
+REG_FLRCSYNCWORD1_BASEADDR         = const(0x09CF)

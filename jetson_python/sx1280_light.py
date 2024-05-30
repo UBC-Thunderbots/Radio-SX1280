@@ -58,7 +58,7 @@ class SX1280:
             6:'Tx Done' }
 
     # TODO: might need this longer to fit the entire payload in the real case.
-    _BUFFER = bytearray(255)
+    _BUFFER = bytearray(140)
 
     _packetParamsLoRa = {
         'PreambleLength': 12,
@@ -92,7 +92,7 @@ class SX1280:
 
     # More parameter definitions
     _syncWordFLRC               = 0x54696761
-    _syncWordToleranceFLRC     = 2
+    _syncWordToleranceFLRC     = 1
 
 
     def __init__(self, spi, cs, reset, busy, dio2, frequency, *, baudrate=constant._LTspeedMaximum, debug=True, txen=False, rxen=False):
@@ -104,23 +104,29 @@ class SX1280:
         self._busy.switch_to_input()
         self._packetType = 0 # default LoRa
         self._debug = debug
-        self.default_dio = dio2
-        self.txen=txen
-        self.rxen=rxen
-        self._frequency=frequency
+        self._defaultDio = dio2
 
+        # TODO: need this?
+        self._txen = txen
+        self._rxen = rxen
+
+        self._frequency = frequency
+
+        # TODO: need this?
         self.rng_rssi=0
 
         self.reset()
         self._busywait()
         self.timeouts = 0
 
+        # TODO: need this?
         # Radio Head (RH) Stuff
         self.ack_delay = None
         self.ack_retries = 5
         self.ack_wait = 0.2
         self.sequence_number = 0
 
+        # TODO: need this?
         # RH Header Bytes
         self.node = constant._RH_BROADCAST_ADDRESS
         self.destination = constant._RH_BROADCAST_ADDRESS
@@ -161,7 +167,7 @@ class SX1280:
         self.setFs()
         self.setHighSensitivityLna(False) # changed to shut off May 6
         self.clearIrqStatus()
-        self.setFLRCPayloadLengthReg(20)  # (constant.RXBUFFER_SIZE)
+        self.setFLRCPayloadLengthReg(127)  # (constant.RXBUFFER_SIZE)
 
         # Disable Advanced Ranging
         self._sendCommand(bytes([0x9A,0]))
@@ -218,6 +224,7 @@ class SX1280:
         '''
         Send a command to the SX1280 radio module.
         '''
+        rxbuffer = bytearray(140)
         if self._debug:
             print('_sendCommand()')
         _size=len(command)
@@ -306,6 +313,7 @@ class SX1280:
         return self._BUFFER[4:_size]
 
 
+    # TODO: use this function?
     def printRegisters(self,start=0x0900,stop=0x09FF,p=True):
         _length=stop-start+1
         _size=_length+4
@@ -339,6 +347,7 @@ class SX1280:
         return False
 
 
+    # TODO: need this?
     def reset_io(self):
         self._reset.switch_to_output(value=False)
         self._busy.switch_to_input()
@@ -348,13 +357,15 @@ class SX1280:
         self.configureLoRa()
 
 
+    # TODO: need this?
     def wait_for_irq(self):
-        if self.default_dio:
-            return self.DIOwait(self.default_dio)
+        if self._defaultDio:
+            return self.DIOwait(self._defaultDio)
         else:
             return self.IRQwait(bit=1)
 
 
+    # TODO: need this?
     # @timeout(3)
     def DIOwait(self,pin):
         _t=monotonic()+3
@@ -367,6 +378,7 @@ class SX1280:
         return False
 
 
+    # TODO: need this?
     # @timeout(4)
     def IRQwait(self,bit):
         _t=monotonic()+4
@@ -411,6 +423,7 @@ class SX1280:
             print('\t\t{}'.format(self._convertStatus(self._BUFFER[0])))
 
 
+    # TODO: need this?
     def wakeUp(self):
         if self._sleeping:
             if self._debug: print('\t\tWaking SX1280')
@@ -585,9 +598,10 @@ class SX1280:
     def clearIrqStatus(self, irqMask=constant.IRQ_RADIO_ALL):
         if self._debug: print('Clearing IRQ Status')
         self._sendCommand( bytes( [constant._RADIO_CLR_IRQSTATUS] + irqMask ) )
+        self.getIrqStatus()
 
 
-    def getIrqStatus(self, clear=[0xFF,0xFF], parse=True, debug=False):
+    def getIrqStatus(self, clear=[0xFF,0xFF], parse=True, debug=True):
         if self._debug: print('getIrqStatus()')
         _, _, _irq1,_irq2 = self._sendCommand( bytes( [constant._RADIO_GET_IRQSTATUS, 0x00, 0x00, 0x00] ) )
 
@@ -636,11 +650,11 @@ class SX1280:
         Time-out duration = pBase * periodBaseCount
         '''
         if self._debug:
-            print('Setting Rx')
+            print('Setting Rx ' )
 
-        if self.rxen:
-            self.txen.value=False
-            self.rxen.value=True
+        if self._rxen : 
+            self._txen . value=False
+            self._rxen . value=True
 
         self.clearIrqStatus()
         self._sendCommand(bytes([constant._RADIO_SET_RX, constant._PERIODBASE_01_MS] + timeoutRx))
@@ -659,12 +673,12 @@ class SX1280:
 
 
     def setHighSensitivityLna(self,enabled=True):
-        _reg_upper, __reg_lower = self._readRegister(0x8,0x91)
+        _regUpper, _ = self._readRegister(0x8,0x91)
 
         if enabled:
-            self._writeRegister( 0x8,0x91, [_reg_upper | 0xC0] )
+            self._writeRegister( 0x8,0x91, [_regUpper | 0xC0] )
         else:
-            self._writeRegister( 0x8, 0x91, [_reg_upper & 0x3F] )
+            self._writeRegister( 0x8, 0x91, [_regUpper & 0x3F] )
 
 
     def getPacketStatus(self):
@@ -704,43 +718,43 @@ class SX1280:
     def listen(self, enable):
         if enable:
             if not self._listen:
-                if self.rxen:
-                    self.txen.value=False
-                    self.rxen.value=True
+                if self._rxen : 
+                    self._txen . value=False
+                    self._rxen . value=True
                 self.setRx()
                 self._listen = True
         else:
-            if self.rxen:
-                self.rxen.value=False
+            if self._rxen   : 
+                self._rxen . value=False
             self.setStandby(_MODE_STDBY_RC)
             self._listen = False
 
 
     # TODO: define clear return value, or just write to a buffer that gets passed in (this is better)
     def receive(self, timeout=15, debug=True):
-        if not self.default_dio:
+        if not self._defaultDio:
             print('must set default DIO!')
             return False
 
         self.setRx()
 
-        timed_out = False
+        timedOut = False
         start = monotonic()
 
         print("Waiting for DIO2 to go high...")
         # Blocking wait for interrupt on DIO
-        while not timed_out and not self.default_dio.value:
+        while not timedOut and not self._defaultDio.value:
             if (monotonic() - start) >= timeout:
-                timed_out = True
+                timedOut = True
 
         # Radio has received something!
         packet = None
         self.setStandby(constant.MODE_STDBY_RC)
 
-        if not timed_out:
+        if not timedOut:
             # print("\tNot timed out, so there must be a payload")
 
-            regdata = self.getIrqStatus()
+            regData = self.getIrqStatus()
 
             self._rxBufferStatus = self.getRxBufferStatus()
             self._packetLength = self._rxBufferStatus[0]
@@ -751,7 +765,7 @@ class SX1280:
                     print('Offset:',self._packetPointer,'Length:',self._packetLength)
                 packet = self.readBuffer(offset=self._packetPointer, payloadLen=self._packetLength+1) # +1 to account for the extra byte sent back
                 
-                regdata = self.getIrqStatus()
+                regData = self.getIrqStatus()
 
                 return packet
 
@@ -780,6 +794,7 @@ class SX1280:
         return self._convertStatus(self._BUFFER[0])
 
 
+    # TODO: need this? at the very least it's out of date/prob doesn't work
     def send_mod(
         self,
         data,
@@ -793,9 +808,9 @@ class SX1280:
         debug=False):
         data_len = len(data)
         assert 0 < data_len <= 252
-        if self.txen:
-            self.rxen.value=False
-            self.txen.value=True
+        if self._txen:
+            self._rxen.value=False
+            self._txen.value=True
             if debug: print('\t\ttxen:on, rxen:off')
         if header:
             payload = bytearray(4)
@@ -827,38 +842,39 @@ class SX1280:
         if keep_listening:
             self.listen=True
         else:
-            if self.txen:
-                self.txen.value=False
+            if self._txen:
+                self._txen.value=False
                 if debug: print('\t\ttxen:off, rxen:n/a')
         return txdone
 
 
+    # TODO: need this? prob doesn't work
     def receive_mod(
         self, *, keep_listening=True, with_header=False, with_ack=False, timeout=15,debug=True):
-        timed_out = False
-        if not self.default_dio:
+        timedOut = False
+        if not self._defaultDio:
             print('must set default DIO!')
             return False
         if timeout is not None:
             # if not self._listen:
             self.listen = True
             start = monotonic()
-            timed_out = False
+            timedOut = False
             # Blocking wait for interrupt on DIO
-            while not timed_out and not self.default_dio.value:
+            while not timedOut and not self._defaultDio.value:
                 if (monotonic() - start) >= timeout:
-                    timed_out = True
+                    timedOut = True
         # Radio has received something!
         packet = None
         # Stop receiving other packets
         self.listen=False
-        if not timed_out:
+        if not timedOut:
 
-            regdata = self.getIrqStatus()
+            regData = self.getIrqStatus()
 
-            # print('IRQ status registers:', bin(regdata), bin(reg_lower))
+            # print('IRQ status registers:', bin(regData), bin(reg_lower))
 
-            # if (regdata & IRQ_HEADER_ERROR) | (regdata & IRQ_CRC_ERROR) | (regdata & IRQ_RX_TX_TIMEOUT ) | (regdata & IRQ_SYNCWORD_ERROR ): #check if any of the preceding IRQs is set
+            # if (regData & IRQ_HEADER_ERROR) | (regData & IRQ_CRC_ERROR) | (regData & IRQ_RX_TX_TIMEOUT ) | (regData & IRQ_SYNCWORD_ERROR ): #check if any of the preceding IRQs is set
             #     return 0 # packet is errored somewhere so return 0
 
             self._rxBufferStatus = self.getRxBufferStatus()
@@ -905,50 +921,49 @@ class SX1280:
         self._writeRegister(constant.REG_LR_FLRCPAYLOADLENGTH[0], constant.REG_LR_FLRCPAYLOADLENGTH[1], [length])
 
 
-    def setSyncWord1(self, sync_word):
+    def setSyncWord1(self, syncWord):
         '''
-        Set sync word 1 for the FLRC packet type
+        Set syncWord1 for the FLRC packet type
         '''
         if self._debug:
-            print(f"setSyncWord1() - {hex(sync_word)}")
+            print(f"setSyncWord1() - {hex(syncWord)}")
 
-        base_address_upper = constant.REG_FLRCSYNCWORD1_BASEADDR[0]
-        base_address_lower = constant.REG_FLRCSYNCWORD1_BASEADDR[1]
+        syncWordAddress0 = constant.REG_FLRCSYNCWORD1_BASEADDR
 
-        base = 0x09CF
-        base1 = base + 1
-        base2 = base + 2
-        base3 = base + 3
-
-        base_upper, base_lower = self._getBytesFromAddress(base)
-        base1_upper, base1_lower = self._getBytesFromAddress(base1)
-        base2_upper, base2_lower = self._getBytesFromAddress(base2)
-        base3_upper, base3_lower = self._getBytesFromAddress(base3)
+        # Extract the individual sync word address bytes
+        syncWordAddress0_bytes = self._getBytesFromAddress( syncWordAddress0 )
+        syncWordAddress1_bytes = self._getBytesFromAddress( syncWordAddress0 + 1 )
+        syncWordAddress2_bytes = self._getBytesFromAddress( syncWordAddress0 + 2 )
+        syncWordAddress3_bytes = self._getBytesFromAddress( syncWordAddress0 + 3 )
         
-        print(f"{hex(base)}, {hex(base1)}, {hex(base2)}, {hex(base3)}")
-        print(f"{hex(base1_upper)}, {hex(base1_lower)}")
+        # Extract the individual bytes of the sync word
+        syncWord_bytes = [
+            ( syncWord >> 24 ) & 0xFF,
+            ( syncWord >> 16 ) & 0xFF,
+            ( syncWord >> 8 ) & 0xFF,
+            ( syncWord ) & 0xFF
+        ]
 
-        data = []
-        data.append( ( sync_word >> 24 ) & 0xFF )
-        data.append( ( sync_word >> 16 ) & 0xFF )
-        data.append( ( sync_word >> 8 ) & 0xFF )
-        data.append( sync_word & 0xFF )
+        # Print the sync word.
+        for i in syncWord_bytes:
+            print( hex(i) )
 
-        for i in data:
-            print(hex(i))
+        # TODO: Try to use a single command instead, with just the base address and the syncWord_bytes list passed in.
+        # Write the sync word to the register, one byte at a time.
+        self._writeRegister( syncWordAddress0_bytes[0], syncWordAddress0_bytes[1], [ syncWord_bytes[0] ] )
+        self._writeRegister( syncWordAddress1_bytes[0], syncWordAddress1_bytes[1], [ syncWord_bytes[1] ] )
+        self._writeRegister( syncWordAddress2_bytes[0], syncWordAddress2_bytes[1], [ syncWord_bytes[2] ] )
+        self._writeRegister( syncWordAddress3_bytes[0], syncWordAddress3_bytes[1], [ syncWord_bytes[3] ] )
+    
+        print("Wrote sync word")
 
-        self._writeRegister(base_upper, base_lower, [data[0]])
-        self._writeRegister(base1_upper, base1_lower, [data[1]])
-        self._writeRegister(base2_upper, base2_lower, [data[2]])
-        self._writeRegister(base3_upper, base3_lower, [data[3]])
-        print("wrote syncword")
-        ret = self._readRegisters(base_upper, base_lower, _length=4)
+        # Read back the registers to make sure the sync word was set correctly.
+        ret = self._readRegisters(syncWordAddress0_bytes[0], syncWordAddress0_bytes[1], _length=4)
 
-        # ret = self._readRegister(base_upper, base_lower)
-        # print(f"setSyncWord1() stored value at ({hex(base_upper)}, {hex(base_lower)}): {hex(i) for i in ret}")
+        # TODO: do something with ret?
 
 
-    def setSyncWordErrorTolerance(self, num_errs):
+    def setSyncWordErrorTolerance(self, numErrsAllowed):
         '''
         Sets how many sync word errors are allowed before a SyncWordError fault is triggered
         Note: This register was not defined in the datasheet, taken from Stuarts project open source library
@@ -959,14 +974,27 @@ class SX1280:
 
         if self._debug:
             print("setSyncWordErrorTolerance()")
-        data_upper = self._readRegisters(0x09, 0xCD)[0] & 0xF0
-        data_lower = num_errs & 0x0F
+        regs = self._readRegisters(0x09, 0xCD)
+        print(f"reading syncWordErrorTolerance registers: {regs}")
+        dataUpper = regs[0] & 0xF0
+        dataLower = numErrsAllowed & 0x0F
 
-        self._writeRegister( 0x09, 0xCD, [data_upper | data_lower] )
+        print(dataLower)
+
+        self._writeRegister( 0x09, 0xCD, [dataUpper | dataLower] )
         self._readRegisters(0x09, 0xCD)
 
     def _getBytesFromAddress(self, address):
+        '''
+        Extracts the upper and lower byte from a register address
+
+        For example, given address 0x09CF, returns [0x09, 0xCF].
+        
+        This makes it easier to use the library functions which write one byte at a time.
+
+        '''
+        
         upper = (address >> 8) & 0xFF
         lower = address & 0XFF
 
-        return (upper, lower)
+        return [upper, lower]

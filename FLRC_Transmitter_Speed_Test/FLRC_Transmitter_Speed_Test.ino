@@ -41,8 +41,8 @@ uint32_t errors;
 
 //User Input Variable
 char userInput;
-// uint8_t buff[RXBUFFER_SIZE];
-uint8_t buff[] = "1234567890";
+uint8_t buff[126]; // RXBUFFER_SIZE
+// uint8_t buff[] = "123456789";
 
 void loop() {
   Serial.print(TXpower);  //print the transmit power defined
@@ -50,9 +50,9 @@ void loop() {
   Serial.print(F("Packet> "));
   Serial.flush();
 
-  // for (int i = 0; i < RXBUFFER_SIZE; ++i) {
-  //   buff[i] = 'A';
-  // }
+  for (int i = 0; i < 126; ++i) { // RXBUFFER_SIZE
+    buff[i] = '1';
+  }
 
   TXPacketL = sizeof(buff);   //set TXPacketL to length of array
   buff[TXPacketL - 1] = '*';  //replace null character at buffer end so its visible on reciver
