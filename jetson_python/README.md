@@ -30,6 +30,8 @@
     - MAXIMUM = 127 bytes
 
 ### Other troubleshooting
+When in doubt, make sure to check all the connections and then double and triple check them. Also make sure all the wires are still soldered correctly. The amount of time I wasted just because these issues...
+
 #### GPIO 0 and 1 permissions
 I had to override chown each time I booted the Jetson to access gpio0 and gpio1 (I think because I wasn't root user)
 
