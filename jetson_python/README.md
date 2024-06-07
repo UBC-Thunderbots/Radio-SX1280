@@ -15,11 +15,16 @@
 - I had to update Python on the Jetson - 3.8 or higher should work.
 
 ### Running this project
-- I had to run this using SPI0 but we'll need to switch to SPI1
+#### Files to care about:
 - The execution script is receive.py
 - The sx1280 library that receive.py uses is 'sx1280_light.py'
     - I created this file based off of 'sx1280.py', but cut out almost all of the irrelevant stuff and added support for FLRC.
     - There are comments throughout the file, indicating files that aren't in use, haven't been tested, parameters that should/should not be modified, etc.
+- Constants are stored in sx1280_definitions.py
+- You can ignore spi_test.py - it's outdated and not being used.
+
+#### Other notes
+- I had to run this using SPI0 but we'll need to switch to SPI1 for the actual thing
 - There are constraints on the payload size and receiving won't just cut off the payload if you violate them, it'll return somewhat convincing garbage - I found this out the hard way so don't do this
     - MINIMUM = 6 bytes
     - MAXIMUM = 127 bytes
