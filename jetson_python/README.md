@@ -5,7 +5,7 @@
 - SX1280 user manual: https://www.tme.eu/Document/1042f35a88b6ee421559d19923804032/SX128x.pdf
 - Stuart's Library Github repo, for setting up the ESP32: https://github.com/StuartsProjects/SX12XX-LoRa
 - CircuitPython SX1280 library, for setting up the Jetson: https://github.com/maholli/CircuitPython_SX1280
-    - Note that this library was very bare bones and only supported LoRa (and not even properly) so take this as a grain of salt; however, it might still be useful since I based this FLRC implementation partially off of this library.
+    - Note that this library was very bare bones and only supported LoRa (and not even properly) so take this with a grain of salt; however, it might still be useful since I based this FLRC implementation partially off of this library.
 - Tutorial: CircuitPython on the Jetson Nano: https://learn.adafruit.com/circuitpython-libraries-on-linux-and-the-nvidia-jetson-nano
 
 #### Libraries needed to install or other dependencies
@@ -17,7 +17,10 @@
 ### Running this project
 - I had to run this using SPI0 but we'll need to switch to SPI1
 - The execution script is receive.py
-- There exist constraints on the payload size
+- The sx1280 library that receive.py uses is 'sx1280_light.py'
+    - I created this file based off of 'sx1280.py', but cut out almost all of the irrelevant stuff and added support for FLRC.
+    - There are comments throughout the file, indicating files that aren't in use, haven't been tested, parameters that should/should not be modified, etc.
+- There are constraints on the payload size and receiving won't just cut off the payload if you violate them, it'll return somewhat convincing garbage - I found this out the hard way so don't do this
     - MINIMUM = 6 bytes
     - MAXIMUM = 127 bytes
 
@@ -26,13 +29,7 @@
 I had to override chown each time I booted the Jetson to access gpio0 and gpio1 (I think because I wasn't root user)
 
 https://github.com/NVIDIA/jetson-gpio/issues/20
-To temporarily fix (need to run every time the jetson reboots)
-sudo usermod -aG gpio $USER
-sudo chown root.gpio /dev/gpiochip1
-sudo chmod 660 /dev/gpiochip1
-
-
-Which values to not change, and which you can play with
-Which functions are untested or unreliable
-notes about sx1280 vs sx1280_light
-Make note of important parameters (things we actually need set a certain way)
+To temporarily fix (need to run every time the jetson reboots):
+- sudo usermod -aG gpio $USER
+- sudo chown root.gpio /dev/gpiochip1
+- sudo chmod 660 /dev/gpiochip1
