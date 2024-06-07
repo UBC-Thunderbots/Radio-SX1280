@@ -15,7 +15,7 @@ import sx1280_light as sx1280
 # MISO    21       D9       SPI1_MISO
 # RESET   38       D20
 # BUSY    40       D21
-# DIO2    7        D4
+# DIO1    7        D4
 
  
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -32,27 +32,21 @@ BUSY = digitalio.DigitalInOut(board.D21)
 print("configured BUSY pin")
 
 # configure DIO1 - pin 7
-DIO2 = digitalio.DigitalInOut(board.D4)
+DIO1 = digitalio.DigitalInOut(board.D4)
 
-# None cs for now since it already uses the CS0 default
-radio = sx1280.SX1280(spi, None, RESET, BUSY, DIO2, 2.420) # for LoRa - 2.445 GHz; for FLRC, was using 2.42GHz for some reason
+# CS = None since it already uses the CS0 default
+radio = sx1280.SX1280(spi, None, RESET, BUSY, DIO1, 2.420) # for LoRa - 2.445 GHz; for FLRC, was using 2.42GHz for some reason
 
 print("Configured the radio")
-print()
+print("----------------------------")
 print()
 
 # Prepare radio for Rx
 radio.listen = True
 
 while True:
-    sleep(1)
     print("Waiting for message...")
-    # msg = radio.receive_mod()
     payload = radio.receive()
     if payload != None:
-        payloadLen = len(payload)
-        print("Payload received: ")
-        print(payload)
+        print(f"Payload received: {payload}")
         print()
-        # print(radio.packet_status)
-        # sleep(1)

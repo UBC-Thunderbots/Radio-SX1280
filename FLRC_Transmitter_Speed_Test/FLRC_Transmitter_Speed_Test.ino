@@ -41,7 +41,7 @@ uint32_t errors;
 
 //User Input Variable
 char userInput;
-uint8_t buff[126]; // RXBUFFER_SIZE
+uint8_t buff[127]; // RXBUFFER_SIZE
 // uint8_t buff[] = "123456789";
 
 void loop() {
@@ -50,12 +50,13 @@ void loop() {
   Serial.print(F("Packet> "));
   Serial.flush();
 
-  for (int i = 0; i < 126; ++i) { // RXBUFFER_SIZE
+  for (int i = 0; i < 127; ++i) { // RXBUFFER_SIZE
     buff[i] = '1';
   }
 
   TXPacketL = sizeof(buff);   //set TXPacketL to length of array
-  buff[TXPacketL - 1] = '*';  //replace null character at buffer end so its visible on reciver
+  buff[0] = '*';              // replace first character with an asterisk so we know that it didn't cut off the first byte
+  buff[TXPacketL - 1] = '*';  // replace last character with an asterisk so we know that it received the last byte
 
   LT.printASCIIPacket(buff, TXPacketL);  //print the buffer (the sent packet) as ASCII
 
